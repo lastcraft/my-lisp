@@ -48,5 +48,5 @@ List delete_head(List list) {
 }
 
 List clone(List list) {
-    cons(list->item, clone(list->next))
+    cons(list->item, clone(list->next));
 }
