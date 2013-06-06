@@ -5,6 +5,13 @@
 }
 %%
 
-list: '(' elements ')';
-elements: atom | list | atom elements | list elements
-atom: NUMBER | SYMBOL;
+list: '(' elements ')'
+    ;
+elements: element
+    | element elements
+    ;
+element: atom
+    | list;
+atom: NUMBER
+    | SYMBOL
+    ;
