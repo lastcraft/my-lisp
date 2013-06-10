@@ -8,7 +8,6 @@ long dictionary_size = 0L;
 static add_to_dictionary(Type *);
 static void create_dictionary(void);
 static void enlarge_dictionary(void);
-static void free_dictionary(void);
 
 struct Object_ {
     Type *type;
@@ -36,16 +35,31 @@ Object *wrap(Type *type, void *value) {
 }
 
 void destroy(Object *object) {
-    object->type->destructor(object->value);
-    free(object);
+    if (object != NULL) {
+        object->type->destructor(object->value);
+        free(object);
+    }
 }
 
 void *value(Object *object) {
-    return object->value;
+    return object == NULL ? NULL : object->value;
 }
 
 void write_object(Object *object, Printf printer) {
-    object->type->writer(object->value, printer);
+    if (object != NULL) {
+        object->type->writer(value(object), printer);
+    }
+}
+
+void free_dictionary(void) {
+    long i;
+    for (i = 0L; i < dictionary_used; i++) {
+        free(dictionary[i]);
+    }
+    free(dictionary);
+    dictionary = NULL;
+    dictionary_used = 0L;
+    dictionary_size = 0L;
 }
 
 static add_to_dictionary(Type *type) {
@@ -65,15 +79,4 @@ static void create_dictionary(void) {
 static void enlarge_dictionary(void) {
     dictionary = (Type **)realloc((void *)dictionary, sizeof(Type *) * (dictionary_size + 10L));
     dictionary_size = dictionary_size + 10L;    
-}
-
-static void free_dictionary(void) {
-    long i;
-    for (i = 0L; i < dictionary_used; i++) {
-        free(dictionary[i]);
-    }
-    free(dictionary);
-    dictionary = NULL;
-    dictionary_used = 0L;
-    dictionary_size = 0L;
 }

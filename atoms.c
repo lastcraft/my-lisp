@@ -19,7 +19,7 @@ Object *number(long l) {
 }
 
 Object *string(char *s) {
-    return wrap(number_type, strdup(s));
+    return wrap(string_type, strdup(s));
 }
 
 void number_writer(void *number, Printf printer) {

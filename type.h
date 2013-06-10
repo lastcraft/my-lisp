@@ -12,5 +12,6 @@ Object *wrap(Type *, void *);
 void destroy(Object *);
 void *value(Object *);
 void write_object(Object *, Printf);
+void free_dictionary(void);
 
 #endif

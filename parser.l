@@ -13,7 +13,7 @@
     return NUMBER;
 }
 
-[a-zA-Z_-] {
+[a-zA-Z_+-][a-zA-Z0-9_+-]* {
     yylval.s = yytext;
     return SYMBOL;
 }
@@ -21,7 +21,6 @@
 [\t ];
 
 \n {
-    printf("ok\n");
     return 0;
 }
 
