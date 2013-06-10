@@ -1,4 +1,5 @@
 #ifndef LIST_HEADER
+#define LIST_HEADER
 
 typedef struct Pair_ Pair;
 typedef Pair* List;
