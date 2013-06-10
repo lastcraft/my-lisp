@@ -1,5 +1,6 @@
 #include "type.h"
 #include <stdlib.h>
+#include <stdarg.h>
 
 static Type **dictionary = NULL;
 long dictionary_used = 0L;
@@ -16,11 +17,13 @@ struct Object_ {
 
 struct Type_ {
     void (*destructor)(void *);
+    void (*writer)(void *, Printf);
 };
 
-Type *declare(void (*destructor)(void *)) {
+Type *declare(void (*destructor)(void *), void (*writer)(void *, Printf)) {
     Type *type = (Type *)malloc(sizeof(Type));
     type->destructor = destructor;
+    type->writer = writer;
     add_to_dictionary(type);
     return type;
 }
@@ -39,6 +42,10 @@ void destroy(Object *object) {
 
 void *value(Object *object) {
     return object->value;
+}
+
+void write_object(Object *object, Printf printer) {
+    object->type->writer(object->value, printer);
 }
 
 static add_to_dictionary(Type *type) {

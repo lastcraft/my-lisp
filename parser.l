@@ -1,10 +1,13 @@
 %{
-#include "y.tab.h"
-#include "list.h"
+
 #include "type.h"
+#include "list.h"
+#include "y.tab.h"
+
 %}
 
 %%
+
 [0-9]+ {
     yylval.l = atoi(yytext);
     return NUMBER;
@@ -26,4 +29,5 @@
 \) { return ')'; }
 
 . ;
+
 %%
