@@ -1,8 +1,8 @@
 #ifndef TYPE_HEADER
 #define TYPE_HEADER
 
-typedef Object_ Object;
-typedef Type_ Type;
+typedef struct Object_ Object;
+typedef struct Type_ Type;
 
 Type *declare(void (*)(void *));
 Object *wrap(Type *, void *);

@@ -1,6 +1,7 @@
 %{
 #include "y.tab.h"
 #include "list.h"
+#include "type.h"
 %}
 
 %%
