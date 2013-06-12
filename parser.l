@@ -1,12 +1,15 @@
 %{
 
 #include "type.h"
-#include "list.h"
 #include "y.tab.h"
 
 %}
 
 %%
+
+nil {
+    return NIL;
+}
 
 [0-9]+ {
     yylval.l = atoi(yytext);
@@ -15,7 +18,7 @@
 
 [a-zA-Z_+-][a-zA-Z0-9_+-]* {
     yylval.s = yytext;
-    return SYMBOL;
+    return IDENTIFIER;
 }
 
 [\t ];

@@ -19,19 +19,23 @@ int main(int argc, char **argv) {
 
 %}
 
+%token NIL
 %token <l> NUMBER
-%token <s> SYMBOL
+%token <s> IDENTIFIER
+
 %union {
     long l;
     char *s;
-    Object *object;
 }
 
 %%
 
 statement: element;
 
-list: '(' elements ')';
+list: list_start elements list_end;
+
+list_start: '(';
+list_end: ')';
 
 elements: element
     | element elements;
@@ -40,4 +44,5 @@ element: atom
     | list;
     
 atom: NUMBER { current_object = number($1); }
-    | SYMBOL { current_object = string($1); };
+    | IDENTIFIER { current_object = identifier($1); }
+    | NIL { current_object = nil(); };
