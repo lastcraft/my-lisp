@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
 %token NIL
 %token <l> NUMBER
 %token <s> IDENTIFIER
+%token <s> QUOTED_STRING
 
 %union {
     long l;
@@ -45,4 +46,5 @@ element: atom
     
 atom: NUMBER { current_object = number($1); }
     | IDENTIFIER { current_object = identifier($1); }
+    | QUOTED_STRING { current_object = quoted_string($1); }
     | NIL { current_object = nil(); };

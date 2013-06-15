@@ -16,6 +16,11 @@ nil {
     return NUMBER;
 }
 
+\"[~"]*\" {
+    yylval.s = yytext;
+    return IDENTIFIER;
+}
+
 [a-zA-Z_+-][a-zA-Z0-9_+-]* {
     yylval.s = yytext;
     return IDENTIFIER;
