@@ -1,6 +1,5 @@
 %{
 
-#include "type.h"
 #include "y.tab.h"
 
 %}
@@ -16,12 +15,12 @@ nil {
     return NUMBER;
 }
 
-\"[~"]*\" {
+\"[^"]*\" {
     yylval.s = yytext;
-    return IDENTIFIER;
+    return QUOTED_STRING;
 }
 
-[a-zA-Z_+-][a-zA-Z0-9_+-]* {
+[a-zA-Z_<>+-][a-zA-Z0-9_<>+-]* {
     yylval.s = yytext;
     return IDENTIFIER;
 }

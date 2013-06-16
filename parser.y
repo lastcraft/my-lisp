@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 Object *current_object = NULL;
-Object *current_pair = NULL;
+Object *temporary_object = NULL;
 
 int main(int argc, char **argv) {
     create_atoms();
@@ -36,8 +36,8 @@ statement: element;
 
 pair: pair_head '.' pair_tail;
 
-pair_head: '(' element;
-pair_tail: element ')';
+pair_head: '(' element { temporary_object = current_object; };
+pair_tail: element ')' { current_object = pair(temporary_object, current_object); };
     
 element: atom
     | pair;
