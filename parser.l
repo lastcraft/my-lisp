@@ -34,6 +34,7 @@ nil {
 
 \( { return '('; }
 \) { return ')'; }
+\. { return '.'; }
 
 . ;
 

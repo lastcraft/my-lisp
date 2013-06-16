@@ -33,16 +33,13 @@ int main(int argc, char **argv) {
 
 statement: element;
 
-list: list_start elements list_end;
+pair: pair_head '.' pair_tail;
 
-list_start: '(';
-list_end: ')';
-
-elements: element
-    | element elements;
+pair_head: '(' element;
+pair_tail: element ')';
     
 element: atom
-    | list;
+    | pair;
     
 atom: NUMBER { current_object = number($1); }
     | IDENTIFIER { current_object = identifier($1); }
