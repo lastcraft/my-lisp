@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 Object *current_object = NULL;
+Object *current_pair = NULL;
 
 int main(int argc, char **argv) {
     create_atoms();

@@ -4,10 +4,10 @@
 #include <string.h>
 #include <stdarg.h>
 
-struct Pair_ {
-    Object *head;
-    Object *tail;
-};
+typedef struct Pair_ {
+    Object *car;
+    Object *cdr;
+} Pair;
 
 static void nil_writer(void *, Printf);
 static void number_writer(void *, Printf);
@@ -68,23 +68,33 @@ static void string_writer(void *text, Printf printer) {
     printer("\"%s\"", (char *)text);    
 }
 
-Object *pair(Object *head, Object *tail) {
+Object *pair(Object *car, Object *cdr) {
     Pair *pair = (Pair *)malloc(sizeof(Pair));
-    pair->head = head;
-    pair->tail = tail;
+    pair->car = car;
+    pair->cdr = cdr;
     return wrap(pair_type, (void *)pair);
 }
 
 static void destroy_pair(void *pair) {
-    destroy(((Pair *)pair)->head);
-    destroy(((Pair *)pair)->tail);
+    destroy(((Pair *)pair)->car);
+    destroy(((Pair *)pair)->cdr);
     free(pair);
 }
 
 static void pair_writer(void *pair, Printf printer) {
     printer("(");
-    write_object(((Pair *)pair)->head, printer);
+    write_object(((Pair *)pair)->car, printer);
     printer(" . ");
-    write_object(((Pair *)pair)->tail, printer);
+    write_object(((Pair *)pair)->cdr, printer);
     printer(")");
+}
+
+Object *car(Object *object) {
+    Pair *pair = (Pair *)value(object);
+    return pair->car;
+}
+
+Object *cdr(Object *object) {
+    Pair *pair = (Pair *)value(object);
+    return pair->cdr;    
 }
