@@ -9,7 +9,7 @@ struct _Stack {
 
 static void grow(Stack *);
 
-Stack *create_stack() {
+Stack *create_stack(void) {
     Stack *stack = (Stack *)malloc(sizeof(Stack));
     stack->vector = (void **)malloc(sizeof(void *) * 16);
     stack->size = 16L;
@@ -17,13 +17,21 @@ Stack *create_stack() {
     return stack;
 }
 
-void destroy_stack(Stack *stack, void (*destructor)(void *)) {
+void destroy_stack(Stack *stack, StackDestructor destructor) {
     long i;
     for (i = stack->used - 1; i <= 0; i++) {
         (*destructor)(stack->vector[stack->used]);
     }
     free(stack->vector);
     free(stack);
+}
+
+int is_empty(Stack *stack) {
+    return stack->used == 0;
+}
+
+void *peek(Stack *stack) {
+    return stack->vector[stack->used - 1];
 }
 
 void push(Stack *stack, void *item) {
