@@ -7,21 +7,25 @@
 #include <stdio.h>
 
 Stack *current_values = NULL;
-Object *temporary_object = NULL;
+
+void destroy_object_stack(void *);
 
 int main(int argc, char **argv) {
     create_atoms();
     current_values = create_stack();
-    push(current_values, (void *)nil());
+    push(current_values, (void *)create_stack());
     yyparse();
-    write_object(peek(current_values), (Printf)printf);
-    printf("\n");
-    if (temporary_object != NULL) {
-        destroy(temporary_object);
+    if (! is_empty(current_values)) {
+        write_object((Object *)peek((Stack *)peek(current_values)), (Printf)printf);
     }
-    destroy_stack(current_values, (StackDestructor)destroy);
+    printf("\n");
+    destroy_stack(current_values, destroy_object_stack);
     free_dictionary();
     return 0;
+}
+
+void destroy_object_stack(void *object_stack) {
+    destroy_stack((Stack *)object_stack, (StackDestructor)destroy);    
 }
 
 %}
@@ -43,32 +47,30 @@ statement: element;
 pair: pair_head '.' pair_tail;
 
 pair_head: '(' element {
-        temporary_object = (Object *)pop(current_values);
-        push(current_values, (void *)nil());
+        Stack *nesting = create_stack();
+        push(nesting, pop((Stack *)peek(current_values)));
+        push(current_values, nesting);
     };
     
 pair_tail: element ')' {
-        Object *current_object = (Object *)pop(current_values);
-        push(current_values, pair(temporary_object, current_object));
-        temporary_object = NULL;
+        Object *second = pop((Stack *)peek(current_values));
+        Object *first = pop((Stack *)peek(current_values));
+        destroy_object_stack(pop(current_values));
+        push((Stack *)peek(current_values), (void *)pair(first, second));
     };
     
 element: atom
     | pair;
     
 atom: NUMBER {
-        destroy((Object *)pop(current_values));
-        push(current_values, (void *)number($1));
+        push((Stack *)peek(current_values), (void *)number($1));
     }
     | IDENTIFIER {
-        destroy((Object *)pop(current_values));
-        push(current_values, (void *)identifier($1));
+        push((Stack *)peek(current_values), (void *)identifier($1));
     }
     | QUOTED_STRING {
-        destroy((Object *)pop(current_values));
-        push(current_values, (void *)quoted_string($1));
+        push((Stack *)peek(current_values), (void *)quoted_string($1));
     }
     | NIL {
-        destroy((Object *)pop(current_values));
-        push(current_values, (void *)nil());
+        push((Stack *)peek(current_values), (void *)nil());
     };
