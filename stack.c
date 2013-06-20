@@ -19,8 +19,8 @@ Stack *create_stack(void) {
 
 void destroy_stack(Stack *stack, StackDestructor destructor) {
     long i;
-    for (i = stack->used - 1; i <= 0; i++) {
-        (*destructor)(stack->vector[stack->used]);
+    while (stack->used < 0) {
+        (*destructor)(stack->vector[--stack->used]);
     }
     free(stack->vector);
     free(stack);
