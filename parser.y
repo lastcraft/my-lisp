@@ -2,6 +2,7 @@
 
 #include "type.h"
 #include "atoms.h"
+#include "pair.h"
 #include "stack.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -11,7 +12,8 @@ Stack *current_values = NULL;
 void destroy_object_stack(void *);
 
 int main(int argc, char **argv) {
-    create_atoms();
+    declare_atoms();
+    declare_pair();
     current_values = create_stack();
     push(current_values, (void *)create_stack());
     yyparse();

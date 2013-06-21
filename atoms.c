@@ -4,26 +4,18 @@
 #include <string.h>
 #include <stdarg.h>
 
-typedef struct Pair_ {
-    Object *car;
-    Object *cdr;
-} Pair;
-
 static void nil_writer(void *, Printf);
 static void number_writer(void *, Printf);
 static void identifier_writer(void *, Printf);
 static void string_writer(void *, Printf);
-static void pair_writer(void *, Printf);
-static long last(char *);
 static void do_nothing(void *);
-static void destroy_pair(void *);
+static long last(char *);
 
-void create_atoms(void) {
+void declare_atoms(void) {
     nil_type = declare(do_nothing, nil_writer);
     number_type = declare(free, number_writer);
     identifier_type = declare(free, identifier_writer);
     string_type = declare(free, string_writer);
-    pair_type = declare(destroy_pair, pair_writer);
 }
 
 Object *nil(void) {
@@ -66,35 +58,4 @@ static long last(char *string) {
 
 static void string_writer(void *text, Printf printer) {
     printer("\"%s\"", (char *)text);    
-}
-
-Object *pair(Object *car, Object *cdr) {
-    Pair *pair = (Pair *)malloc(sizeof(Pair));
-    pair->car = car;
-    pair->cdr = cdr;
-    return wrap(pair_type, (void *)pair);
-}
-
-static void destroy_pair(void *pair) {
-    destroy(((Pair *)pair)->car);
-    destroy(((Pair *)pair)->cdr);
-    free(pair);
-}
-
-static void pair_writer(void *pair, Printf printer) {
-    printer("(");
-    write_object(((Pair *)pair)->car, printer);
-    printer(" . ");
-    write_object(((Pair *)pair)->cdr, printer);
-    printer(")");
-}
-
-Object *car(Object *object) {
-    Pair *pair = (Pair *)value(object);
-    return pair->car;
-}
-
-Object *cdr(Object *object) {
-    Pair *pair = (Pair *)value(object);
-    return pair->cdr;    
 }
