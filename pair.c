@@ -1,5 +1,6 @@
 #include "pair.h"
 #include "type.h"
+#include "nil.h"
 #include <stdlib.h>
 #include <stdarg.h>
 
@@ -31,8 +32,10 @@ static void destroy_pair(void *pair) {
 static void pair_writer(void *pair, Printf printer) {
     printer("(");
     write_object(((Pair *)pair)->car, printer);
-    printer(" . ");
-    write_object(((Pair *)pair)->cdr, printer);
+    if (! is_nil(((Pair *)pair)->cdr)) {
+        printer(" . ");
+        write_object(((Pair *)pair)->cdr, printer);
+    }
     printer(")");
 }
 
