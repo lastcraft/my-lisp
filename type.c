@@ -41,6 +41,10 @@ void destroy(Object *object) {
     }
 }
 
+int is_a(Type *type, Object *object) {
+    return type == object->type;
+}
+
 void *value(Object *object) {
     return object == NULL ? NULL : object->value;
 }

@@ -22,6 +22,10 @@ Object *nil(void) {
     return wrap(nil_type, NULL);
 }
 
+int is_nil(Object *object) {
+    return is_a(nil_type, object);
+}
+
 static void do_nothing(void *memory) { }
 
 static void nil_writer(void *nil, Printf printer) {
@@ -34,12 +38,20 @@ Object *number(long number) {
     return wrap(number_type, cell);
 }
 
+int is_number(Object *object) {
+    return is_a(number_type, object);
+}
+
 static void number_writer(void *number, Printf printer) {
     printer("%d", *(long *)number);
 }
 
 Object *identifier(char *name) {
     return wrap(identifier_type, strdup(name));
+}
+
+int is_identifier(Object *object) {
+    return is_a(identifier_type, object);
 }
 
 static void identifier_writer(void *name, Printf printer) {
@@ -50,6 +62,10 @@ Object *quoted_string(char *quoted) {
     char *string = strdup(quoted + 1);
     string[last(string)] = '\0';
     return wrap(string_type, string);
+}
+
+int is_string(Object *object) {
+    return is_a(string_type, object);
 }
 
 static long last(char *string) {

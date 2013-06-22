@@ -10,6 +10,7 @@ typedef int (*Printf)(char *, ...);
 Type *declare(void (*destructor)(void *), void (*writer)(void *, Printf));
 Object *wrap(Type *, void *);
 void destroy(Object *);
+int is_a(Type *, Object *);
 void *value(Object *);
 void write_object(Object *, Printf);
 void free_dictionary(void);
