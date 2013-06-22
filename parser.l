@@ -6,7 +6,7 @@
 
 %%
 
-nil {
+\(\) {
     return NIL;
 }
 

@@ -21,5 +21,5 @@ int is_nil(Object *object) {
 static void do_nothing(void *memory) { }
 
 static void nil_writer(void *nil, Printf printer) {
-    printer("nil");
+    printer("()");
 }
