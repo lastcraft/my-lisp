@@ -4,32 +4,15 @@
 #include <string.h>
 #include <stdarg.h>
 
-static void nil_writer(void *, Printf);
 static void number_writer(void *, Printf);
 static void identifier_writer(void *, Printf);
 static void string_writer(void *, Printf);
-static void do_nothing(void *);
 static long last(char *);
 
 void declare_atoms(void) {
-    nil_type = declare(do_nothing, nil_writer);
     number_type = declare(free, number_writer);
     identifier_type = declare(free, identifier_writer);
     string_type = declare(free, string_writer);
-}
-
-Object *nil(void) {
-    return wrap(nil_type, NULL);
-}
-
-int is_nil(Object *object) {
-    return is_a(nil_type, object);
-}
-
-static void do_nothing(void *memory) { }
-
-static void nil_writer(void *nil, Printf printer) {
-    printer("nil");
 }
 
 Object *number(long number) {

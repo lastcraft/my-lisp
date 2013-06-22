@@ -1,6 +1,7 @@
 %{
 
 #include "type.h"
+#include "nil.h"
 #include "atoms.h"
 #include "pair.h"
 #include "stack.h"
@@ -12,6 +13,7 @@ Stack *current_values = NULL;
 void destroy_object_stack(void *);
 
 int main(int argc, char **argv) {
+    declare_nil();
     declare_atoms();
     declare_pair();
     current_values = create_stack();
