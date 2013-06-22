@@ -48,9 +48,10 @@ void destroy_object_stack(void *object_stack) {
 
 statement: element;
 
-pair: pair_head '.' pair_tail;
+pair: list_head '.' pair_tail
+    | list_head list_tail;
 
-pair_head: '(' element {
+list_head: '(' element {
         Stack *nesting = create_stack();
         push(nesting, pop((Stack *)peek(current_values)));
         push(current_values, nesting);
@@ -61,6 +62,9 @@ pair_tail: element ')' {
         Object *first = pop((Stack *)peek(current_values));
         destroy_object_stack(pop(current_values));
         push((Stack *)peek(current_values), (void *)pair(first, second));
+    };
+    
+list_tail: ')' {
     };
     
 element: atom
