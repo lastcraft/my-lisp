@@ -10,6 +10,7 @@ typedef struct Pair_ {
 } Pair;
 
 static void pair_writer(void *, Printf);
+static void write_cdr(Object *, Printf);
 static void destroy_pair(void *);
 
 void declare_pair(void) {
@@ -23,6 +24,10 @@ Object *pair(Object *car, Object *cdr) {
     return wrap(pair_type, (void *)pair);
 }
 
+int is_pair(Object *object) {
+    return is_a(pair_type, object);
+}
+
 static void destroy_pair(void *pair) {
     destroy(((Pair *)pair)->car);
     destroy(((Pair *)pair)->cdr);
@@ -32,11 +37,20 @@ static void destroy_pair(void *pair) {
 static void pair_writer(void *pair, Printf printer) {
     printer("(");
     write_object(((Pair *)pair)->car, printer);
-    if (! is_nil(((Pair *)pair)->cdr)) {
-        printer(" . ");
-        write_object(((Pair *)pair)->cdr, printer);
-    }
+    write_cdr(((Pair *)pair)->cdr, printer);
     printer(")");
+}
+
+static void write_cdr(Object *object, Printf printer) {
+    if (is_nil(object)) {
+    } else if (is_pair(object)) {
+        printer(" ");
+        write_object(car(object), printer);
+        write_cdr(cdr(object), printer);
+    } else {
+        printer(" . ");
+        write_object(object, printer);
+    }
 }
 
 Object *car(Object *object) {

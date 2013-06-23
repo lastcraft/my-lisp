@@ -7,6 +7,7 @@ Type *pair_type;
 
 void declare_pair(void);
 Object *pair(Object *, Object *);
+int is_pair(Object *);
 Object *car(Object *);
 Object *cdr(Object *);
 
