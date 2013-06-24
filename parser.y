@@ -65,6 +65,9 @@ pair_tail: element ')' {
     };
     
 list_tail: ')' {
+        Object *only = pop((Stack *)peek(current_values));
+        destroy_object_stack(pop(current_values));
+        push((Stack *)peek(current_values), (void *)pair(only, nil()));
     };
     
 element: atom
