@@ -10,7 +10,8 @@
 
 Stack *current_values = NULL;
 
-void destroy_object_stack(void *);
+static void destroy_object_stack(void *);
+static Object *pour_stack_into_list(Object *, Stack *);
 
 int main(int argc, char **argv) {
     declare_nil();
@@ -28,8 +29,15 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void destroy_object_stack(void *object_stack) {
+static void destroy_object_stack(void *object_stack) {
     destroy_stack((Stack *)object_stack, (StackDestructor)destroy);    
+}
+
+static Object *pour_stack_into_list(Object *list, Stack *stack) {
+    while (! is_empty(stack)) {
+        list = pair((Object *)pop(stack), list);
+    }
+    return list;
 }
 
 %}
