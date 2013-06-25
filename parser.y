@@ -56,30 +56,36 @@ static Object *pour_stack_into_list(Object *list, Stack *stack) {
 
 statement: element;
 
-pair: list_head '.' pair_tail
-    | list_head list_tail;
+list: list_head elements '.' pair_tail
+    | list_head elements list_tail;
 
-list_head: '(' element {
-        Stack *nesting = create_stack();
-        push(nesting, pop((Stack *)peek(current_values)));
-        push(current_values, nesting);
+list_head: '(' {
+        push(current_values, create_stack());
     };
     
 pair_tail: element ')' {
         Object *second = pop((Stack *)peek(current_values));
         Object *first = pop((Stack *)peek(current_values));
-        destroy_object_stack(pop(current_values));
-        push((Stack *)peek(current_values), (void *)pair(first, second));
+        Object *list = pair(first, second);
+        Stack *stack = pop(current_values);
+        list = pour_stack_into_list(list, stack);
+        destroy_object_stack(stack);
+        push((Stack *)peek(current_values), (void *)list);
     };
     
 list_tail: ')' {
-        Object *only = pop((Stack *)peek(current_values));
-        destroy_object_stack(pop(current_values));
-        push((Stack *)peek(current_values), (void *)pair(only, nil()));
+        Object *last = pop((Stack *)peek(current_values));
+        Object *list = pair(last, nil());
+        Stack *stack = pop(current_values);
+        list = pour_stack_into_list(list, stack);
+        destroy_object_stack(stack);
+        push((Stack *)peek(current_values), (void *)list);
     };
     
+elements: element | elements element;
+    
 element: atom
-    | pair;
+    | list;
     
 atom: NUMBER {
         push((Stack *)peek(current_values), (void *)number($1));
