@@ -57,26 +57,32 @@ static Object *pour_stack_into_list(Object *list, Stack *stack) {
 statement: element;
 
 list: list_head elements '.' pair_tail
-    | list_head elements list_tail;
+    | list_head elements list_tail
+    | list_head empty_list;
 
 list_head: '(' {
         push(current_values, create_stack());
     };
     
+empty_list: ')' {
+        destroy_object_stack((Stack *)pop(current_values));
+        push((Stack *)peek(current_values), (void *)nil());
+    };
+
 pair_tail: element ')' {
-        Object *second = pop((Stack *)peek(current_values));
-        Object *first = pop((Stack *)peek(current_values));
-        Object *list = pair(first, second);
         Stack *stack = pop(current_values);
+        Object *second = pop(stack);
+        Object *first = pop(stack);
+        Object *list = pair(first, second);
         list = pour_stack_into_list(list, stack);
         destroy_object_stack(stack);
         push((Stack *)peek(current_values), (void *)list);
     };
     
 list_tail: ')' {
-        Object *last = pop((Stack *)peek(current_values));
-        Object *list = pair(last, nil());
         Stack *stack = pop(current_values);
+        Object *last = pop(stack);
+        Object *list = pair(last, nil());
         list = pour_stack_into_list(list, stack);
         destroy_object_stack(stack);
         push((Stack *)peek(current_values), (void *)list);
