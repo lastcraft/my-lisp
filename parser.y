@@ -12,6 +12,8 @@ Stack *current_values = NULL;
 
 static void destroy_object_stack(void *);
 static Object *pour_stack_into_list(Object *, Stack *);
+void execute(Object *);
+Object *apply(char *, Object *);
 
 int main(int argc, char **argv) {
     declare_nil();
@@ -21,9 +23,8 @@ int main(int argc, char **argv) {
     push(current_values, (void *)create_stack());
     yyparse();
     if (! is_empty(current_values)) {
-        write_object((Object *)peek((Stack *)peek(current_values)), (Printf)printf);
+        execute((Object *)peek((Stack *)peek(current_values)));
     }
-    printf("\n");
     destroy_stack(current_values, destroy_object_stack);
     free_dictionary();
     return 0;
@@ -38,6 +39,28 @@ static Object *pour_stack_into_list(Object *list, Stack *stack) {
         list = pair((Object *)pop(stack), list);
     }
     return list;
+}
+
+void execute(Object *statement) {
+    if (is_pair(statement)) {
+        if (is_identifier(car(statement))) {
+            Object *result = apply((char *)value(car(statement)), cdr(statement));
+            write_object(result, (Printf)printf);
+            printf("\n");
+        } else {
+            printf("Identifier expected\n");
+        }
+    } else {
+        write_object(statement, (Printf)printf);
+        printf("\n");
+    }
+}
+
+Object *apply(char *symbol, Object *values) {
+    printf("Applying %s to ", symbol);
+    write_object(values, (Printf)printf);
+    printf("\n");
+    return nil();
 }
 
 %}
