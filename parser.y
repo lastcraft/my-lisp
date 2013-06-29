@@ -12,7 +12,8 @@ Stack *current_values = NULL;
 
 static void destroy_object_stack(void *);
 static Object *pour_stack_into_list(Object *, Stack *);
-void execute(Object *);
+Object *eval(Object *);
+void print(Object *value);
 Object *apply(char *, Object *);
 
 int main(int argc, char **argv) {
@@ -23,7 +24,7 @@ int main(int argc, char **argv) {
     push(current_values, (void *)create_stack());
     yyparse();
     if (! is_empty(current_values)) {
-        execute((Object *)peek((Stack *)peek(current_values)));
+        print(eval((Object *)peek((Stack *)peek(current_values))));
     }
     destroy_stack(current_values, destroy_object_stack);
     free_dictionary();
@@ -41,19 +42,23 @@ static Object *pour_stack_into_list(Object *list, Stack *stack) {
     return list;
 }
 
-void execute(Object *statement) {
+Object *eval(Object *statement) {
     if (is_pair(statement)) {
         if (is_identifier(car(statement))) {
             Object *result = apply((char *)value(car(statement)), cdr(statement));
-            write_object(result, (Printf)printf);
-            printf("\n");
+            return result;
         } else {
             printf("Identifier expected\n");
+            return nil();
         }
     } else {
-        write_object(statement, (Printf)printf);
-        printf("\n");
+        return statement;
     }
+}
+
+void print(Object *value) {
+    write_object(value, (Printf)printf);
+    printf("\n");
 }
 
 Object *apply(char *symbol, Object *values) {
@@ -69,7 +74,6 @@ Object *apply(char *symbol, Object *values) {
 %token <l> NUMBER
 %token <s> IDENTIFIER
 %token <s> QUOTED_STRING
-%token EXECUTE
 
 %union {
     long l;
