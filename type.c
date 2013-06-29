@@ -11,6 +11,7 @@ static void enlarge_dictionary(void);
 
 struct Object_ {
     Type *type;
+    long reference_count;
     void *value;
 };
 
@@ -30,15 +31,25 @@ Type *declare(void (*destructor)(void *), void (*writer)(void *, Printf)) {
 Object *wrap(Type *type, void *value) {
     Object *object = (Object *)malloc(sizeof(Object));
     object->type = type;
+    object->reference_count = 1L;
     object->value = value;
     return object;
 }
 
 void destroy(Object *object) {
     if (object != NULL) {
-        object->type->destructor(object->value);
-        free(object);
+        if (object->reference_count > 1L) {
+            object->reference_count--;
+        } else {
+            object->type->destructor(object->value);
+            free(object);
+        }
     }
+}
+
+Object *clone(Object *object) {
+    object->reference_count++;
+    return object;
 }
 
 int is_a(Type *type, Object *object) {
