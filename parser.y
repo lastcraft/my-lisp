@@ -69,6 +69,7 @@ Object *apply(char *symbol, Object *values) {
 %token <l> NUMBER
 %token <s> IDENTIFIER
 %token <s> QUOTED_STRING
+%token EXECUTE
 
 %union {
     long l;
@@ -77,7 +78,7 @@ Object *apply(char *symbol, Object *values) {
 
 %%
 
-statement: element;
+statement: elements;
 
 list: list_head elements '.' pair_tail
     | list_head elements list_tail
