@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-static Type **dictionary = NULL;
-long dictionary_used = 0L;
-long dictionary_size = 0L;
-static void add_to_dictionary(Type *);
-static void create_dictionary(void);
-static void enlarge_dictionary(void);
+static Type **declarations = NULL;
+long declarations_used = 0L;
+long declarations_size = 0L;
+static void add_to_declarations(Type *);
+static void create_declarations(void);
+static void enlarge_declarations(void);
 
 struct Object_ {
     Type *type;
@@ -24,7 +24,7 @@ Type *declare(void (*destructor)(void *), void (*writer)(void *, Printf)) {
     Type *type = (Type *)malloc(sizeof(Type));
     type->destructor = destructor;
     type->writer = writer;
-    add_to_dictionary(type);
+    add_to_declarations(type);
     return type;
 }
 
@@ -66,32 +66,32 @@ void write_object(Object *object, Printf printer) {
     }
 }
 
-void free_dictionary(void) {
+void free_declarations(void) {
     long i;
-    for (i = 0L; i < dictionary_used; i++) {
-        free(dictionary[i]);
+    for (i = 0L; i < declarations_used; i++) {
+        free(declarations[i]);
     }
-    free(dictionary);
-    dictionary = NULL;
-    dictionary_used = 0L;
-    dictionary_size = 0L;
+    free(declarations);
+    declarations = NULL;
+    declarations_used = 0L;
+    declarations_size = 0L;
 }
 
-static void add_to_dictionary(Type *type) {
-    if (dictionary == NULL) {
-        create_dictionary();
-    } else if (dictionary_used == dictionary_size) {
-        enlarge_dictionary();
+static void add_to_declarations(Type *type) {
+    if (declarations == NULL) {
+        create_declarations();
+    } else if (declarations_used == declarations_size) {
+        enlarge_declarations();
     }
-    dictionary[dictionary_used++] = type;
+    declarations[declarations_used++] = type;
 }
 
-static void create_dictionary(void) {
-    dictionary = (Type **)malloc(sizeof(Type *) * 10L);
-    dictionary_size = 10L;
+static void create_declarations(void) {
+    declarations = (Type **)malloc(sizeof(Type *) * 10L);
+    declarations_size = 10L;
 }
 
-static void enlarge_dictionary(void) {
-    dictionary = (Type **)realloc((void *)dictionary, sizeof(Type *) * (dictionary_size + 10L));
-    dictionary_size = dictionary_size + 10L;    
+static void enlarge_declarations(void) {
+    declarations = (Type **)realloc((void *)declarations, sizeof(Type *) * (declarations_size + 10L));
+    declarations_size = declarations_size + 10L;    
 }

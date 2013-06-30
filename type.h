@@ -14,6 +14,6 @@ Object *clone(Object *);
 int is_a(Type *, Object *);
 void *value(Object *);
 void write_object(Object *, Printf);
-void free_dictionary(void);
+void free_declarations(void);
 
 #endif

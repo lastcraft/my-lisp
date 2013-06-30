@@ -12,9 +12,10 @@ Stack *current_values = NULL;
 
 static void destroy_object_stack(void *);
 static Object *pour_stack_into_list(Object *, Stack *);
-Object *eval(Object *);
-void print(Object *value);
-Object *apply(char *, Object *);
+static Object *read(Stack *);
+static void print(Object *value);
+static Object *eval(Object *);
+static Object *apply(char *, Object *);
 
 int main(int argc, char **argv) {
     declare_nil();
@@ -22,12 +23,9 @@ int main(int argc, char **argv) {
     declare_pair();
     current_values = create_stack();
     push(current_values, (void *)create_stack());
-    yyparse();
-    if (! is_empty(current_values)) {
-        print(eval((Object *)peek((Stack *)peek(current_values))));
-    }
+    print(eval(read(current_values)));
     destroy_stack(current_values, destroy_object_stack);
-    free_dictionary();
+    free_declarations();
     return 0;
 }
 
@@ -42,26 +40,39 @@ static Object *pour_stack_into_list(Object *list, Stack *stack) {
     return list;
 }
 
-Object *eval(Object *statement) {
-    if (is_pair(statement)) {
-        if (is_identifier(car(statement))) {
-            Object *result = apply((char *)value(car(statement)), cdr(statement));
-            return result;
-        } else {
-            printf("Identifier expected\n");
-            return nil();
-        }
+static Object *read(Stack *input) {
+    yyparse();
+    if (! is_empty(input)) {
+        return (Object *)peek((Stack *)peek(input));
     } else {
-        return statement;
+        return NULL;
     }
 }
 
-void print(Object *value) {
-    write_object(value, (Printf)printf);
-    printf("\n");
+static void print(Object *value) {
+    if (value != NULL) {
+        write_object(value, (Printf)printf);
+        printf("\n");
+    }
 }
 
-Object *apply(char *symbol, Object *values) {
+static Object *eval(Object *object) {
+    if (object == NULL) {
+        return NULL;
+    }
+    if (is_pair(object)) {
+        if (is_identifier(car(object))) {
+            return apply((char *)value(car(object)), cdr(object));
+        } else {
+            printf("Identifier expected\n");
+            return NULL;
+        }
+    } else {
+        return object;
+    }
+}
+
+static Object *apply(char *symbol, Object *values) {
     printf("Applying %s to ", symbol);
     write_object(values, (Printf)printf);
     printf("\n");
