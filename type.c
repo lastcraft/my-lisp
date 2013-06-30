@@ -5,7 +5,7 @@
 static Type **dictionary = NULL;
 long dictionary_used = 0L;
 long dictionary_size = 0L;
-static add_to_dictionary(Type *);
+static void add_to_dictionary(Type *);
 static void create_dictionary(void);
 static void enlarge_dictionary(void);
 
@@ -77,7 +77,7 @@ void free_dictionary(void) {
     dictionary_size = 0L;
 }
 
-static add_to_dictionary(Type *type) {
+static void add_to_dictionary(Type *type) {
     if (dictionary == NULL) {
         create_dictionary();
     } else if (dictionary_used == dictionary_size) {
