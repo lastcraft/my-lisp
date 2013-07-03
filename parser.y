@@ -14,6 +14,8 @@ extern int yyparse(void);
 extern int yylex(void);
 extern void yyerror(char *);
 
+static Stack *create_context(void);
+static void free_context(Stack *);
 static void destroy_object_stack(void *);
 static Object *pour_stack_into_list(Object *, Stack *);
 static Object *read(Stack *);
@@ -25,12 +27,21 @@ int main(int argc, char **argv) {
     declare_nil();
     declare_atoms();
     declare_pair();
-    current_values = create_stack();
-    push(current_values, (void *)create_stack());
+    current_values = create_context();
     print(eval(read(current_values)));
-    destroy_stack(current_values, destroy_object_stack);
+    free_context(current_values);
     free_declarations();
     return 0;
+}
+
+static Stack *create_context(void) {
+    Stack *context = create_stack();
+    push(context, (void *)create_stack());
+    return context;
+}
+
+static void free_context(Stack *context) {
+    destroy_stack(context, destroy_object_stack);
 }
 
 static void destroy_object_stack(void *object_stack) {
