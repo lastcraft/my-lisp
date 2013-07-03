@@ -11,6 +11,8 @@
 Stack *current_values = NULL;
 
 extern int yyparse(void);
+extern int yylex(void);
+extern void yyerror(char *);
 
 static void destroy_object_stack(void *);
 static Object *pour_stack_into_list(Object *, Stack *);
