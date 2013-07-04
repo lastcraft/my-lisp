@@ -6,35 +6,38 @@
 #include <stdio.h>
 #include <setjmp.h>
 
+#define try if (! setjmp(context))
+#define catch else
+
 extern void create_context(void);
 extern void free_context(void);
 extern Object *read(void);
 
-static void *error(char *);
+static void *throw(void *);
 static void print(Object *value);
-static Object *eval(Object *, void *(*)(char *));
+static Object *eval(Object *, void *(*)(void *));
 static Object *apply(char *, Object *);
 
 static jmp_buf context;
-static char *last_error = NULL;
+static char *last_exception = NULL;
 
 int main(int argc, char **argv) {
     declare_nil();
     declare_atoms();
     declare_pair();
     create_context();
-    if (! setjmp(context)) {
-        print(eval(read(), error));
-    } else {
-        printf("Error! %s\n", last_error);
+    try {
+        print(eval(read(), throw));
+    } catch {
+        printf("Error! %s\n", (char *)last_exception);
     }
     free_context();
     free_declarations();
     return 0;
 }
 
-static void *error(char *message) {
-    last_error = message;
+static void *throw(void *exception) {
+    last_exception = exception;
     longjmp(context, 1);
     return NULL;
 }
@@ -47,14 +50,14 @@ static void print(Object *value) {
     }
 }
 
-static Object *eval(Object *object, void *(*error)(char *)) {
+static Object *eval(Object *object, void *(*error)(void *)) {
     if (is_pair(object)) {
         if (is_identifier(car(object))) {
             Object *result = apply((char *)value(car(object)), cdr(object));
             destroy(object);
             return result;
         } else {
-            return error("Identifier expected");
+            return error((void *)"Identifier expected");
         }
     } else {
         return object;
