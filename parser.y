@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-Stack *current_values = NULL;
+Stack *input = NULL;
 
 extern int yyparse(void);
 extern int yylex(void);
@@ -21,18 +21,18 @@ static void destroy_object_stack(void *);
 static Object *pour_stack_into_list(Object *, Stack *);
 
 void create_context(void) {
-    current_values = create_stack();
-    push(current_values, (void *)create_stack());
+    input = create_stack();
+    push(input, (void *)create_stack());
 }
 
 void free_context(void) {
-    destroy_stack(current_values, destroy_object_stack);
+    destroy_stack(input, destroy_object_stack);
 }
 
 Object *read(void) {
     yyparse();
-    if (! is_empty(current_values)) {
-        return (Object *)peek((Stack *)peek(current_values));
+    if (! is_empty(input)) {
+        return (Object *)peek((Stack *)peek(input));
     } else {
         return NULL;
     }
@@ -70,31 +70,31 @@ list: list_head elements '.' pair_tail
     | list_head empty_list;
 
 list_head: '(' {
-        push(current_values, create_stack());
+        push(input, create_stack());
     };
     
 empty_list: ')' {
-        destroy_object_stack((Stack *)pop(current_values));
-        push((Stack *)peek(current_values), (void *)nil());
+        destroy_object_stack((Stack *)pop(input));
+        push((Stack *)peek(input), (void *)nil());
     };
 
 pair_tail: element ')' {
-        Stack *stack = pop(current_values);
+        Stack *stack = pop(input);
         Object *second = pop(stack);
         Object *first = pop(stack);
         Object *list = pair(first, second);
         list = pour_stack_into_list(list, stack);
         destroy_object_stack(stack);
-        push((Stack *)peek(current_values), (void *)list);
+        push((Stack *)peek(input), (void *)list);
     };
     
 list_tail: ')' {
-        Stack *stack = pop(current_values);
+        Stack *stack = pop(input);
         Object *last = pop(stack);
         Object *list = pair(last, nil());
         list = pour_stack_into_list(list, stack);
         destroy_object_stack(stack);
-        push((Stack *)peek(current_values), (void *)list);
+        push((Stack *)peek(input), (void *)list);
     };
     
 elements: element | elements element;
@@ -103,14 +103,14 @@ element: atom
     | list;
     
 atom: NUMBER {
-        push((Stack *)peek(current_values), (void *)number($1));
+        push((Stack *)peek(input), (void *)number($1));
     }
     | IDENTIFIER {
-        push((Stack *)peek(current_values), (void *)identifier($1));
+        push((Stack *)peek(input), (void *)identifier($1));
     }
     | QUOTED_STRING {
-        push((Stack *)peek(current_values), (void *)quoted_string($1));
+        push((Stack *)peek(input), (void *)quoted_string($1));
     }
     | NIL {
-        push((Stack *)peek(current_values), (void *)nil());
+        push((Stack *)peek(input), (void *)nil());
     };
