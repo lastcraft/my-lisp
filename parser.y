@@ -31,10 +31,10 @@ void free_context(void) {
 
 Object *read(void) {
     yyparse();
-    if (! is_empty(input)) {
-        return (Object *)pop((Stack *)peek(input));
-    } else {
+    if (is_empty(input)) {
         return nil();
+    } else {
+        return (Object *)pop((Stack *)peek(input));
     }
 }
 
