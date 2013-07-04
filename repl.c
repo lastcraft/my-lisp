@@ -32,12 +32,11 @@ static void print(Object *value) {
 }
 
 static Object *eval(Object *object) {
-    if (object == NULL) {
-        return NULL;
-    }
     if (is_pair(object)) {
         if (is_identifier(car(object))) {
-            return apply((char *)value(car(object)), cdr(object));
+            Object *result = apply((char *)value(car(object)), cdr(object));
+            destroy(object);
+            return result;
         } else {
             printf("Identifier expected\n");
             return NULL;

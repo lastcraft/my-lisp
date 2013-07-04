@@ -32,9 +32,9 @@ void free_context(void) {
 Object *read(void) {
     yyparse();
     if (! is_empty(input)) {
-        return (Object *)peek((Stack *)peek(input));
+        return (Object *)pop((Stack *)peek(input));
     } else {
-        return NULL;
+        return nil();
     }
 }
 
