@@ -14,18 +14,18 @@ extern int yyparse(void);
 extern int yylex(void);
 extern void yyerror(char *);
 
-void create_context(void);
-void free_context(void);
+void create_reader(void);
+void free_reader(void);
 Object *read(void);
 static void destroy_object_stack(void *);
 static Object *pour_stack_into_list(Object *, Stack *);
 
-void create_context(void) {
+void create_reader(void) {
     input = create_stack();
     push(input, (void *)create_stack());
 }
 
-void free_context(void) {
+void free_reader(void) {
     destroy_stack(input, destroy_object_stack);
 }
 

@@ -1,4 +1,4 @@
-#ifndef DICTONARY_HEADER
+#ifndef DICTIONARY_HEADER
 #define DICTIONARY_HEADER
 
 #include "type.h"

@@ -3,43 +3,31 @@
 #include "atoms.h"
 #include "pair.h"
 #include "stack.h"
+#include "exception.h"
 #include <stdio.h>
-#include <setjmp.h>
 
-#define try if (! setjmp(context))
-#define catch else
-
-extern void create_context(void);
-extern void free_context(void);
+extern void create_reader(void);
+extern void free_reader(void);
 extern Object *read(void);
 
-static void *throw(void *);
 static void print(Object *value);
-static Object *eval(Object *, void *(*)(void *));
+static void print_error(char *, Object *);
+static Object *eval(Object *, Throw);
 static Object *apply(char *, Object *);
-
-static jmp_buf context;
-static char *last_exception = NULL;
 
 int main(int argc, char **argv) {
     declare_nil();
     declare_atoms();
     declare_pair();
-    create_context();
-    try {
-        print(eval(read(), throw));
-    } catch {
-        printf("Error! %s\n", (char *)last_exception);
+    create_reader();
+    Try {
+        print(eval(read(), throw_exception));
+    } Catch {
+        print_error(exception_message(), (Object *)exception_information());
     }
-    free_context();
+    free_reader();
     free_declarations();
     return 0;
-}
-
-static void *throw(void *exception) {
-    last_exception = exception;
-    longjmp(context, 1);
-    return NULL;
 }
 
 static void print(Object *value) {
@@ -50,14 +38,23 @@ static void print(Object *value) {
     }
 }
 
-static Object *eval(Object *object, void *(*error)(void *)) {
+static void print_error(char *message, Object *object) {
+    printf("%s for object ", message);
+    write_object(object, (Printf)printf);
+    printf("\n");
+    destroy(object);
+}
+
+static Object *eval(Object *object, Throw throw_exception) {
     if (is_pair(object)) {
         if (is_identifier(car(object))) {
             Object *result = apply((char *)value(car(object)), cdr(object));
             destroy(object);
             return result;
         } else {
-            return error((void *)"Identifier expected");
+            Object *wrong_object = clone(car(object));
+            destroy(object);
+            return throw_exception("Identifier expected", (void *)wrong_object);
         }
     } else {
         return object;
