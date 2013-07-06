@@ -34,7 +34,7 @@ static void print(Object *value) {
 }
 
 static void print_error(char *message, Object *object) {
-    printf("%s for object ", message);
+    printf("%s: ", message);
     write_object(object, (Printf)printf);
     printf("\n");
     destroy(object);

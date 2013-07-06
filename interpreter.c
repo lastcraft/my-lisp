@@ -2,8 +2,8 @@
 #include "nil.h"
 #include "atoms.h"
 #include "pair.h"
+#include "function.h"
 #include "dictionary.h"
-#include <stdio.h>
 
 static Dictionary *dictionary;
 
@@ -11,6 +11,7 @@ void create_interpreter(void) {
     declare_nil();
     declare_atoms();
     declare_pair();
+    declare_functions();
     dictionary = create_dictionary();
 }
 
@@ -34,16 +35,19 @@ Object *eval_function(Object *identifier, Object *arguments, ErrorHandler error)
         destroy(arguments);
         return error("Identifier expected", (void *)identifier);
     }
-    if (! find(dictionary, (char *)value(identifier))) {
+    Object *function;
+    if (! (function = find(dictionary, (char *)value(identifier)))) {
         destroy(arguments);
         return error("Unknown identifier", (void *)identifier);
     }
-    return apply((char *)value(identifier), arguments, error);
+    if (! is_function(function)) {
+        destroy(arguments);
+        return error("Identifier does not refer to a function", (void *)identifier);
+    }
+    destroy(identifier);
+    return apply(function, arguments, error);
 }
 
-Object *apply(char *symbol, Object *arguments, ErrorHandler error) {
-    printf("Applying %s to ", symbol);
-    write_object(arguments, (Printf)printf);
-    printf("\n");
+Object *apply(Object *function, Object *arguments, ErrorHandler error) {
     return nil();
 }
