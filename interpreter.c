@@ -4,6 +4,16 @@
 #include "pair.h"
 #include <stdio.h>
 
+void create_interpreter(void) {
+    declare_nil();
+    declare_atoms();
+    declare_pair();
+}
+
+void free_interpreter(void) {
+    free_declarations();
+}
+
 Object *eval(Object *object, ErrorHandler error) {
     if (is_pair(object)) {
         Object *result = eval_function(clone(car(object)), clone(cdr(object)), error);

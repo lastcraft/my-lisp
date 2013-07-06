@@ -15,9 +15,7 @@ static void print(Object *value);
 static void print_error(char *, Object *);
 
 int main(int argc, char **argv) {
-    declare_nil();
-    declare_atoms();
-    declare_pair();
+    create_interpreter();
     create_reader();
     Try {
         print(eval(read(), throw_exception));
@@ -25,7 +23,7 @@ int main(int argc, char **argv) {
         print_error(exception_message(), (Object *)exception_information());
     }
     free_reader();
-    free_declarations();
+    free_interpreter();
     return 0;
 }
 
