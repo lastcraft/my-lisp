@@ -49,6 +49,7 @@ Object *find(Dictionary *dictionary, char *key) {
         if (key_matches(key, entry->key)) {
             return entry->object;
         }
+        entry = entry->next;
     }
     return NULL;
 }

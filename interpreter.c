@@ -4,6 +4,7 @@
 #include "pair.h"
 #include "function.h"
 #include "dictionary.h"
+#include "built_ins.h"
 
 static Dictionary *dictionary;
 static Object *execute(Callable, Object *, ErrorHandler);
@@ -14,6 +15,7 @@ void create_interpreter(void) {
     declare_pair();
     declare_functions();
     dictionary = create_dictionary();
+    declare_built_ins(dictionary);
 }
 
 void free_interpreter(void) {
