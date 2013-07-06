@@ -3,18 +3,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct Entry_ {
+typedef struct Entry_ Entry;
+struct Entry_ {
     Entry *next;
     char *key;
     Object *object;
-} Entry;
+};
 
 struct Dictionary_ {
     Entry *first;
 };
 
 Entry **vacancy(Dictionary *);
-static key_matches(char *, char *);
+static int key_matches(char *, char *);
 
 Dictionary *create_dictionary(void) {
     Dictionary *dictionary = (Dictionary *)malloc(sizeof(Dictionary));
@@ -55,11 +56,11 @@ Object *find(Dictionary *dictionary, char *key) {
 Entry **vacancy(Dictionary *dictionary) {
     Entry **slot = &(dictionary->first);
     while (*slot != NULL) {
-        **slot = &((*slot)->next);
+        slot = &((*slot)->next);
     }
     return slot;
 }
 
-static key_matches(char *key1, char *key2) {
+static int key_matches(char *key1, char *key2) {
     return strcmp(key1, key2) == 0;
 }
