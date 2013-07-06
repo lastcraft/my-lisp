@@ -12,7 +12,8 @@ extern Object *read(void);
 
 static void print(Object *value);
 static void print_error(char *, Object *);
-static Object *eval(Object *, Throw);
+static Object *eval(Object *, ErrorHandler);
+static Object *eval_function(Object *, Object *, ErrorHandler);
 static Object *apply(char *, Object *);
 
 int main(int argc, char **argv) {
@@ -45,25 +46,28 @@ static void print_error(char *message, Object *object) {
     destroy(object);
 }
 
-static Object *eval(Object *object, Throw throw_exception) {
+static Object *eval(Object *object, ErrorHandler throw_exception) {
     if (is_pair(object)) {
-        if (is_identifier(car(object))) {
-            Object *result = apply((char *)value(car(object)), cdr(object));
-            destroy(object);
-            return result;
-        } else {
-            Object *wrong_object = clone(car(object));
-            destroy(object);
-            return throw_exception("Identifier expected", (void *)wrong_object);
-        }
+        Object *result = eval_function(clone(car(object)), clone(cdr(object)), throw_exception);
+        destroy(object);
+        return result;
     } else {
         return object;
     }
 }
 
-static Object *apply(char *symbol, Object *values) {
+static Object *eval_function(Object *identifier, Object *arguments, ErrorHandler throw_exception) {
+    if (is_identifier(identifier)) {
+        return apply((char *)value(identifier), arguments);
+    } else {
+        destroy(arguments);
+        return throw_exception("Identifier expected", (void *)identifier);
+    }
+}
+
+static Object *apply(char *symbol, Object *arguments) {
     printf("Applying %s to ", symbol);
-    write_object(values, (Printf)printf);
+    write_object(arguments, (Printf)printf);
     printf("\n");
     return nil();
 }

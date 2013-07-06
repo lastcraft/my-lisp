@@ -7,7 +7,7 @@ typedef struct Dictionary_ Dictionary;
 
 Dictionary *create_dictionary(void);
 void destroy_dictionary(Dictionary *);
-Object *find(Dictionary *, char *);
 void add(Dictionary *, char *, Object *);
+Object *find(Dictionary *, char *);
 
 #endif

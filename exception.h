@@ -7,7 +7,7 @@
 #define Try if (! setjmp(*execution_context()))
 #define Catch else
 
-typedef void *Throw(char *, void *);
+typedef void *ErrorHandler(char *, void *);
 
 jmp_buf *execution_context(void);
 void *throw_exception(char *, void *);
