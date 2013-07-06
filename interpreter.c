@@ -30,15 +30,18 @@ Object *eval(Object *object, ErrorHandler error) {
 }
 
 Object *eval_function(Object *identifier, Object *arguments, ErrorHandler error) {
-    if (is_identifier(identifier)) {
-        return apply((char *)value(identifier), arguments);
-    } else {
+    if (! is_identifier(identifier)) {
         destroy(arguments);
         return error("Identifier expected", (void *)identifier);
     }
+    if (! find(dictionary, (char *)value(identifier))) {
+        destroy(arguments);
+        return error("Unknown identifier", (void *)identifier);
+    }
+    return apply((char *)value(identifier), arguments, error);
 }
 
-Object *apply(char *symbol, Object *arguments) {
+Object *apply(char *symbol, Object *arguments, ErrorHandler error) {
     printf("Applying %s to ", symbol);
     write_object(arguments, (Printf)printf);
     printf("\n");
