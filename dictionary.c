@@ -23,7 +23,7 @@ Dictionary *create_dictionary(void) {
     return dictionary;
 }
 
-void destroy_dictionary(Dictionary *dictionary) {
+void free_dictionary(Dictionary *dictionary) {
     Entry *entry = dictionary->first;
     while (entry != NULL) {
         Entry *next = entry->next;

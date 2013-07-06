@@ -2,15 +2,20 @@
 #include "nil.h"
 #include "atoms.h"
 #include "pair.h"
+#include "dictionary.h"
 #include <stdio.h>
+
+static Dictionary *dictionary;
 
 void create_interpreter(void) {
     declare_nil();
     declare_atoms();
     declare_pair();
+    dictionary = create_dictionary();
 }
 
 void free_interpreter(void) {
+    free_dictionary(dictionary);
     free_declarations();
 }
 

@@ -1,8 +1,6 @@
 #include "type.h"
 #include "nil.h"
-#include "atoms.h"
 #include "pair.h"
-#include "stack.h"
 #include "exception.h"
 #include "interpreter.h"
 #include <stdio.h>
