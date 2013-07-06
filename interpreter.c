@@ -6,6 +6,7 @@
 #include "dictionary.h"
 
 static Dictionary *dictionary;
+static Object *execute(Callable, Object *, ErrorHandler);
 
 void create_interpreter(void) {
     declare_nil();
@@ -22,7 +23,7 @@ void free_interpreter(void) {
 
 Object *eval(Object *object, ErrorHandler error) {
     if (is_pair(object)) {
-        Object *result = eval_function(clone(car(object)), clone(cdr(object)), error);
+        Object *result = eval_call(clone(car(object)), clone(cdr(object)), error);
         destroy(object);
         return result;
     } else {
@@ -30,7 +31,7 @@ Object *eval(Object *object, ErrorHandler error) {
     }
 }
 
-Object *eval_function(Object *identifier, Object *arguments, ErrorHandler error) {
+Object *eval_call(Object *identifier, Object *arguments, ErrorHandler error) {
     if (! is_identifier(identifier)) {
         destroy(arguments);
         return error("Identifier expected", (void *)identifier);
@@ -49,5 +50,12 @@ Object *eval_function(Object *identifier, Object *arguments, ErrorHandler error)
 }
 
 Object *apply(Object *function, Object *arguments, ErrorHandler error) {
+    if (is_built_in(function)) {
+        return execute((Callable)value(function), arguments, error);
+    }
     return nil();
+}
+
+static Object *execute(Callable built_in, Object *arguments, ErrorHandler error) {
+    return (*built_in)(arguments);
 }

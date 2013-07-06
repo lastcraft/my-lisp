@@ -27,7 +27,15 @@ Object *lambda(Object *arguments, Object *body) {
 }
 
 int is_function(Object *object) {
-    return is_a(built_in_type, object) || is_a(lambda_type, object);
+    return is_built_in(object) || is_lambda(object);
+}
+
+int is_built_in(Object *object) {
+    return is_a(built_in_type, object);
+}
+
+int is_lambda(Object *object) {
+    return is_a(lambda_type, object);
 }
 
 static void built_in_writer(void *built_in, Printf printer) {

@@ -8,8 +8,10 @@ Type *built_in_type;
 Type *lambda_type;
 
 void declare_functions(void);
-Object *built_in(Callable code);
+Object *built_in(Callable);
 Object *lambda(Object *, Object *);
 int is_function(Object *);
+int is_built_in(Object *);
+int is_lambda(Object *);
 
 #endif
