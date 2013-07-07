@@ -17,15 +17,15 @@ void declare_standard_library(Dictionary *dictionary) {
     add(dictionary, "+", built_in(plus));
 }
 
-static Object *quit(Object *object, ErrorHandler error, Dictionary *dictionary) {
-    Object *code = exit_code(is_number(object) ? (int)value(object) : 0);
-    destroy(object);
+static Object *quit(Object *arguments, ErrorHandler error, Dictionary *dictionary) {
+    Object *code = exit_code(is_pair(arguments) && is_number(car(arguments)) ? *(int *)value(car(arguments)) : 0);
+    destroy(arguments);
     return error("Quitting", code);
 }
 
 static Object *set(Object *arguments, ErrorHandler error, Dictionary *dictionary) {
     char *identifier = value(car(arguments));
-    add(dictionary, identifier, clone(cdr(arguments)));
+    add(dictionary, identifier, clone(car(cdr(arguments))));
     destroy(arguments);
     return nil();
 }
