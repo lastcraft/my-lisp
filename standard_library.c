@@ -26,6 +26,12 @@ static Object *plus(Object *arguments, ErrorHandler error, Dictionary *dictionar
     Object *tail;
     while (! is_nil(arguments)) {
         tail = clone(cdr(arguments));
+        if (! is_number(car(arguments))) {
+            Object *bad_number = clone(car(arguments));
+            destroy(arguments);
+            destroy(tail);
+            error("Not a number", (void *)bad_number);
+        }
         total = total + *(long *)value(car(arguments));
         destroy(arguments);
         arguments = tail;
