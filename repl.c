@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     create_interpreter();
     create_reader();
     Try {
-        print(eval(read(), throw_exception));
+        print(eval(read(), throw_exception, top_level()));
     } Catch {
         print_error(exception_message(), (Object *)exception_information());
     }

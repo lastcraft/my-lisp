@@ -4,10 +4,11 @@
 #include "pair.h"
 #include "function.h"
 #include "dictionary.h"
-#include "built_ins.h"
+#include "standard_library.h"
 
 static Dictionary *dictionary;
-static Object *execute(Callable, Object *, ErrorHandler);
+static Object *eval_call(Object *, Object *, ErrorHandler, Dictionary *);
+static Object *execute(Callable, Object *, ErrorHandler, Dictionary *);
 
 void create_interpreter(void) {
     declare_nil();
@@ -15,7 +16,7 @@ void create_interpreter(void) {
     declare_pair();
     declare_functions();
     dictionary = create_dictionary();
-    declare_built_ins(dictionary);
+    declare_standard_library(dictionary);
 }
 
 void free_interpreter(void) {
@@ -23,9 +24,13 @@ void free_interpreter(void) {
     free_declarations();
 }
 
-Object *eval(Object *object, ErrorHandler error) {
+Dictionary *top_level(void) {
+    return dictionary;
+}
+
+Object *eval(Object *object, ErrorHandler error, Dictionary *dictionary) {
     if (is_pair(object)) {
-        Object *result = eval_call(clone(car(object)), clone(cdr(object)), error);
+        Object *result = eval_call(clone(car(object)), clone(cdr(object)), error, dictionary);
         destroy(object);
         return result;
     } else {
@@ -33,7 +38,14 @@ Object *eval(Object *object, ErrorHandler error) {
     }
 }
 
-Object *eval_call(Object *identifier, Object *arguments, ErrorHandler error) {
+Object *apply(Object *function, Object *arguments, ErrorHandler error, Dictionary *dictionary) {
+    if (is_built_in(function)) {
+        return execute((Callable)value(function), arguments, error, dictionary);
+    }
+    return nil();
+}
+
+static Object *eval_call(Object *identifier, Object *arguments, ErrorHandler error, Dictionary *dictionary) {
     if (! is_identifier(identifier)) {
         destroy(arguments);
         return error("Identifier expected", (void *)identifier);
@@ -48,16 +60,9 @@ Object *eval_call(Object *identifier, Object *arguments, ErrorHandler error) {
         return error("Identifier does not refer to a function", (void *)identifier);
     }
     destroy(identifier);
-    return apply(function, arguments, error);
+    return apply(function, arguments, error, dictionary);
 }
 
-Object *apply(Object *function, Object *arguments, ErrorHandler error) {
-    if (is_built_in(function)) {
-        return execute((Callable)value(function), arguments, error);
-    }
-    return nil();
-}
-
-static Object *execute(Callable built_in, Object *arguments, ErrorHandler error) {
-    return (*built_in)(arguments);
+static Object *execute(Callable built_in, Object *arguments, ErrorHandler error, Dictionary *dictionary) {
+    return (*built_in)(arguments, error, dictionary);
 }

@@ -2,8 +2,10 @@
 #define FUNCTION_HEADER
 
 #include "type.h"
+#include "exception.h"
+#include "dictionary.h"
 
-typedef Object *(*Callable)(Object *);
+typedef Object *(*Callable)(Object *, ErrorHandler, Dictionary *);
 Type *built_in_type;
 Type *lambda_type;
 

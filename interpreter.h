@@ -3,11 +3,12 @@
 
 #include "type.h"
 #include "exception.h"
+#include "dictionary.h"
 
 void create_interpreter(void);
 void free_interpreter(void);
-Object *eval(Object *, ErrorHandler);
-Object *eval_call(Object *, Object *, ErrorHandler);
-Object *apply(Object *, Object *, ErrorHandler);
+Dictionary *top_level(void);
+Object *eval(Object *, ErrorHandler, Dictionary *);
+Object *apply(Object *, Object *, ErrorHandler, Dictionary *);
 
 #endif
