@@ -13,6 +13,7 @@ static Object *plus(Object *, ErrorHandler, Dictionary *);
 
 void declare_standard_library(Dictionary *dictionary) {
     add(dictionary, "quit", built_in(quit));
+    add(dictionary, "exit", built_in(quit));
     add(dictionary, "set", built_in(set));
     add(dictionary, "+", built_in(plus));
 }
