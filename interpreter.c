@@ -2,12 +2,14 @@
 #include "nil.h"
 #include "atoms.h"
 #include "pair.h"
+#include "exit.h"
 #include "function.h"
 #include "dictionary.h"
 #include "standard_library.h"
 
 static Dictionary *dictionary;
 static Object *eval_call(Object *, Object *, ErrorHandler, Dictionary *);
+static Object *eval_identifier(Object *, ErrorHandler, Dictionary *);
 static Object *execute(Callable, Object *, ErrorHandler, Dictionary *);
 
 void create_interpreter(void) {
@@ -15,6 +17,7 @@ void create_interpreter(void) {
     declare_atoms();
     declare_pair();
     declare_functions();
+    declare_exit_code();
     dictionary = create_dictionary();
     declare_standard_library(dictionary);
 }
@@ -33,6 +36,8 @@ Object *eval(Object *object, ErrorHandler error, Dictionary *dictionary) {
         Object *result = eval_call(clone(car(object)), clone(cdr(object)), error, dictionary);
         destroy(object);
         return result;
+    } else if (is_identifier(object)) {
+        return eval_identifier(object, error, dictionary);
     } else {
         return object;
     }
@@ -61,6 +66,15 @@ static Object *eval_call(Object *identifier, Object *arguments, ErrorHandler err
     }
     destroy(identifier);
     return apply(function, arguments, error, dictionary);
+}
+
+static Object *eval_identifier(Object *identifier, ErrorHandler error, Dictionary *dictionary) {
+    Object *found;
+    if (! (found = find(dictionary, (char *)value(identifier)))) {
+        return error("Unkown identifier", identifier);
+    } else {
+        return clone(found);
+    }
 }
 
 static Object *execute(Callable built_in, Object *arguments, ErrorHandler error, Dictionary *dictionary) {
