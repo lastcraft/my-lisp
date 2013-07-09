@@ -76,7 +76,7 @@ static Object *reverse_onto(Object *target, Object *source) {
         return target;
     }
     Object *head = clone(car(source));
-    Object *tail = cdr(source);
+    Object *tail = clone(cdr(source));
     destroy(source);
     return reverse_onto(pair(head, target), tail);
 }

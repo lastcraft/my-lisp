@@ -15,6 +15,7 @@ void declare_functions(void);
 Object *built_in(Callable);
 Object *lambda(Object *, Object *);
 Callable code(BuiltIn *built_in);
+Object *special_form(Object *);
 int is_function(Object *);
 int is_special_form(Object *);
 int is_built_in(Object *);

@@ -1,4 +1,5 @@
 #include "standard_library.h"
+#include "interpreter.h"
 #include "dictionary.h"
 #include "type.h"
 #include "function.h"
@@ -8,13 +9,17 @@
 #include "exit.h"
 
 static Object *quit(Object *, ErrorHandler, Dictionary *);
+static Object *quote(Object *, ErrorHandler, Dictionary *);
 static Object *set(Object *, ErrorHandler, Dictionary *);
+static Object *setq(Object *, ErrorHandler, Dictionary *);
 static Object *plus(Object *, ErrorHandler, Dictionary *);
 
 void declare_standard_library(Dictionary *dictionary) {
     add(dictionary, "quit", built_in(quit));
     add(dictionary, "exit", built_in(quit));
+    add(dictionary, "quote", special_form(built_in(quote)));
     add(dictionary, "set", built_in(set));
+    add(dictionary, "setq", special_form(built_in(setq)));
     add(dictionary, "+", built_in(plus));
 }
 
@@ -24,9 +29,22 @@ static Object *quit(Object *arguments, ErrorHandler error, Dictionary *dictionar
     return error("Quitting", code);
 }
 
+static Object *quote(Object *arguments, ErrorHandler error, Dictionary *dictionary) {
+    Object *as_is = clone(car(arguments));
+    destroy(arguments);
+    return as_is;
+}
+
 static Object *set(Object *arguments, ErrorHandler error, Dictionary *dictionary) {
     char *identifier = value(car(arguments));
     add(dictionary, identifier, clone(car(cdr(arguments))));
+    destroy(arguments);
+    return nil();
+}
+
+static Object *setq(Object *arguments, ErrorHandler error, Dictionary *dictionary) {
+    char *identifier = value(car(arguments));
+    add(dictionary, identifier, eval(clone(car(cdr(arguments))), error, dictionary));
     destroy(arguments);
     return nil();
 }

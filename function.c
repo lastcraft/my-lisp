@@ -39,6 +39,15 @@ Callable code(BuiltIn *built_in) {
     return built_in->code;
 }
 
+Object *special_form(Object *function) {
+    if (is_built_in(function)) {
+        ((BuiltIn *)value(function))->special_form = 1;
+    } else {
+        ((Lambda *)value(function))->special_form = 1;
+    }
+    return function;
+}
+
 int is_function(Object *object) {
     return is_built_in(object) || is_lambda(object);
 }

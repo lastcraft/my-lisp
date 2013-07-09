@@ -47,16 +47,16 @@ Object *eval(Object *object, ErrorHandler error, Dictionary *dictionary) {
 
 Object *apply(Object *function, Object *arguments, ErrorHandler error, Dictionary *dictionary) {
     if (is_built_in(function)) {
-        return execute(code((BuiltIn *)value(function)),
-                       eval_arguments(arguments, error, dictionary),
-                       error,
-                       dictionary);
+        if (! is_special_form(function)) {
+            arguments = eval_arguments(arguments, error, dictionary);
+        }
+        return execute(code((BuiltIn *)value(function)), arguments, error, dictionary);
     }
     return nil();
 }
 
 static Object *eval_arguments(Object *arguments, ErrorHandler error, Dictionary *dictionary) {
-    return eval_arguments_onto(nil(), arguments, error, dictionary);
+    return reverse(eval_arguments_onto(nil(), arguments, error, dictionary));
 }
 
 static Object *eval_arguments_onto(Object *target, Object *source, ErrorHandler error, Dictionary *dictionary) {
