@@ -10,9 +10,9 @@
 static Dictionary *dictionary;
 static Object *eval_call(Object *, Object *, ErrorHandler, Dictionary *);
 static Object *eval_identifier(Object *, ErrorHandler, Dictionary *);
-static Object *execute(Callable, Object *, ErrorHandler, Dictionary *);
 static Object *eval_arguments(Object *, ErrorHandler, Dictionary *);
 static Object *eval_arguments_onto(Object *, Object *, ErrorHandler, Dictionary *);
+static Object *execute(Callable, Object *, ErrorHandler, Dictionary *);
 
 void create_interpreter(void) {
     declare_nil();
@@ -47,7 +47,7 @@ Object *eval(Object *object, ErrorHandler error, Dictionary *dictionary) {
 
 Object *apply(Object *function, Object *arguments, ErrorHandler error, Dictionary *dictionary) {
     if (is_built_in(function)) {
-        return execute((Callable)value(function),
+        return execute(code((BuiltIn *)value(function)),
                        eval_arguments(arguments, error, dictionary),
                        error,
                        dictionary);
@@ -96,6 +96,6 @@ static Object *eval_identifier(Object *identifier, ErrorHandler error, Dictionar
     }
 }
 
-static Object *execute(Callable built_in, Object *arguments, ErrorHandler error, Dictionary *dictionary) {
-    return (*built_in)(arguments, error, dictionary);
+static Object *execute(Callable code, Object *arguments, ErrorHandler error, Dictionary *dictionary) {
+    return (*code)(arguments, error, dictionary);
 }
