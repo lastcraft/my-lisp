@@ -11,6 +11,8 @@ static Dictionary *dictionary;
 static Object *eval_call(Object *, Object *, ErrorHandler, Dictionary *);
 static Object *eval_identifier(Object *, ErrorHandler, Dictionary *);
 static Object *execute(Callable, Object *, ErrorHandler, Dictionary *);
+static Object *eval_arguments(Object *, ErrorHandler, Dictionary *);
+static Object *eval_arguments_onto(Object *, Object *, ErrorHandler, Dictionary *);
 
 void create_interpreter(void) {
     declare_nil();
@@ -48,6 +50,20 @@ Object *apply(Object *function, Object *arguments, ErrorHandler error, Dictionar
         return execute((Callable)value(function), arguments, error, dictionary);
     }
     return nil();
+}
+
+static Object *eval_arguments(Object *arguments, ErrorHandler error, Dictionary *dictionary) {
+    return eval_arguments_onto(nil(), arguments, error, dictionary);
+}
+
+static Object *eval_arguments_onto(Object *target, Object *source, ErrorHandler error, Dictionary *dictionary) {
+    if (is_nil(source)) {
+        return target;
+    }
+    Object *evaluated = eval(clone(car(source)), error, dictionary);
+    Object *remaining = clone(cdr(source));
+    destroy(source);
+    return eval_arguments_onto(pair(evaluated, target), remaining, error, dictionary);
 }
 
 static Object *eval_call(Object *identifier, Object *arguments, ErrorHandler error, Dictionary *dictionary) {

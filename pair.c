@@ -12,6 +12,7 @@ typedef struct Pair_ {
 static void pair_writer(void *, Printf);
 static void write_cdr(Object *, Printf);
 static void destroy_pair(void *);
+static Object *reverse_onto(Object *, Object *);
 
 void declare_pair(void) {
     pair_type = declare(destroy_pair, pair_writer);
@@ -61,4 +62,21 @@ Object *car(Object *object) {
 Object *cdr(Object *object) {
     Pair *pair = (Pair *)value(object);
     return pair->cdr;    
+}
+
+Object *reverse(Object *object) {
+    if (! is_pair(object)) {
+        return object;
+    }
+    return reverse_onto(nil(), object);
+}
+
+static Object *reverse_onto(Object *target, Object *source) {
+    if (is_nil(source)) {
+        return target;
+    }
+    Object *head = clone(car(source));
+    Object *tail = cdr(source);
+    destroy(source);
+    return reverse_onto(pair(head, target), tail);
 }
