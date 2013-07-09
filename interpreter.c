@@ -47,7 +47,10 @@ Object *eval(Object *object, ErrorHandler error, Dictionary *dictionary) {
 
 Object *apply(Object *function, Object *arguments, ErrorHandler error, Dictionary *dictionary) {
     if (is_built_in(function)) {
-        return execute((Callable)value(function), arguments, error, dictionary);
+        return execute((Callable)value(function),
+                       eval_arguments(arguments, error, dictionary),
+                       error,
+                       dictionary);
     }
     return nil();
 }
