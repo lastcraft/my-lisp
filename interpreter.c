@@ -7,7 +7,7 @@
 #include "binding.h"
 #include "standard_library.h"
 
-static Binding *binding;
+static Binding *top_level_binding;
 static Object *eval_call(Object *, Object *, ErrorHandler, Binding *);
 static Object *eval_identifier(Object *, ErrorHandler, Binding *);
 static Object *eval_arguments(Object *, ErrorHandler, Binding *);
@@ -20,17 +20,17 @@ void create_interpreter(void) {
     declare_pair();
     declare_functions();
     declare_exit_code();
-    binding = create_binding(NULL);
-    declare_standard_library(binding);
+    top_level_binding = create_binding(NULL);
+    declare_standard_library(top_level_binding);
 }
 
 void free_interpreter(void) {
-    free_binding(binding);
+    free_binding(top_level_binding);
     free_declarations();
 }
 
 Binding *top_level(void) {
-    return binding;
+    return top_level_binding;
 }
 
 Object *eval(Object *object, ErrorHandler error, Binding *binding) {
