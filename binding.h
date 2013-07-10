@@ -8,6 +8,7 @@ typedef struct Binding_ Binding;
 Binding *create_binding(Binding *);
 Binding *free_binding(Binding *);
 void add(Binding *, char *, Object *);
+Object *extract(Binding *, char *);
 Object *find(Binding *, char *);
 
 #endif

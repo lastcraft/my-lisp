@@ -11,29 +11,32 @@ struct Entry_ {
 };
 
 struct Binding_ {
+    Binding *parent;
     Entry *first;
 };
 
-Entry **vacancy(Binding *);
+static Object *free_entry(Entry *);
+static Entry **vacancy(Binding *);
+static Entry **find_owner(Binding *, char *);
 static int key_matches(char *, char *);
 
 Binding *create_binding(Binding *parent) {
     Binding *binding = (Binding *)malloc(sizeof(Binding));
+    binding->parent = parent;
     binding->first = NULL;
     return binding;
 }
 
 Binding *free_binding(Binding *binding) {
+    Binding *parent = binding->parent;
     Entry *entry = binding->first;
     while (entry != NULL) {
         Entry *next = entry->next;
-        free(entry->key);
-        destroy(entry->object);
-        free(entry);
+        destroy(free_entry(entry));
         entry = next;
     }
     free(binding);
-    return NULL;
+    return parent;
 }
 
 void add(Binding *binding, char *key, Object *object) {
@@ -42,6 +45,16 @@ void add(Binding *binding, char *key, Object *object) {
     (*slot)->next = NULL;
     (*slot)->key = strdup(key);
     (*slot)->object = object;
+}
+
+Object *extract(Binding *binding, char *key) {
+    Entry **owner = find_owner(binding, key);
+    if (owner == NULL) {
+        return NULL;
+    }
+    Entry *entry = *owner;
+    *owner = entry->next;
+    return free_entry(entry);
 }
 
 Object *find(Binding *binding, char *key) {
@@ -55,12 +68,30 @@ Object *find(Binding *binding, char *key) {
     return NULL;
 }
 
-Entry **vacancy(Binding *binding) {
+static Object *free_entry(Entry *entry) {
+    Object *object = entry->object;
+    free(entry->key);
+    free(entry);
+    return object;
+}
+
+static Entry **vacancy(Binding *binding) {
     Entry **slot = &(binding->first);
     while (*slot != NULL) {
         slot = &((*slot)->next);
     }
     return slot;
+}
+
+static Entry **find_owner(Binding *binding, char *key) {
+    Entry **owner = &(binding->first);
+    while (*owner != NULL) {
+        if (key_matches(key, (*owner)->key)) {
+            return owner;
+        }
+        owner = &((*owner)->next);
+    }
+    return NULL;
 }
 
 static int key_matches(char *key1, char *key2) {
