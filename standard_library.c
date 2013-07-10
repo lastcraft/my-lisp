@@ -1,6 +1,6 @@
 #include "standard_library.h"
 #include "interpreter.h"
-#include "dictionary.h"
+#include "binding.h"
 #include "type.h"
 #include "function.h"
 #include "nil.h"
@@ -8,48 +8,48 @@
 #include "pair.h"
 #include "exit.h"
 
-static Object *quit(Object *, ErrorHandler, Dictionary *);
-static Object *quote(Object *, ErrorHandler, Dictionary *);
-static Object *set(Object *, ErrorHandler, Dictionary *);
-static Object *setq(Object *, ErrorHandler, Dictionary *);
-static Object *plus(Object *, ErrorHandler, Dictionary *);
+static Object *quit(Object *, ErrorHandler, Binding *);
+static Object *quote(Object *, ErrorHandler, Binding *);
+static Object *set(Object *, ErrorHandler, Binding *);
+static Object *setq(Object *, ErrorHandler, Binding *);
+static Object *plus(Object *, ErrorHandler, Binding *);
 
-void declare_standard_library(Dictionary *dictionary) {
-    add(dictionary, "quit", built_in(quit));
-    add(dictionary, "exit", built_in(quit));
-    add(dictionary, "quote", special_form(built_in(quote)));
-    add(dictionary, "set", built_in(set));
-    add(dictionary, "setq", special_form(built_in(setq)));
-    add(dictionary, "+", built_in(plus));
+void declare_standard_library(Binding *binding) {
+    add(binding, "quit", built_in(quit));
+    add(binding, "exit", built_in(quit));
+    add(binding, "quote", special_form(built_in(quote)));
+    add(binding, "set", built_in(set));
+    add(binding, "setq", special_form(built_in(setq)));
+    add(binding, "+", built_in(plus));
 }
 
-static Object *quit(Object *arguments, ErrorHandler error, Dictionary *dictionary) {
+static Object *quit(Object *arguments, ErrorHandler error, Binding *binding) {
     Object *code = exit_code(is_pair(arguments) && is_number(car(arguments)) ? *(int *)value(car(arguments)) : 0);
     destroy(arguments);
     return error("Quitting", code);
 }
 
-static Object *quote(Object *arguments, ErrorHandler error, Dictionary *dictionary) {
+static Object *quote(Object *arguments, ErrorHandler error, Binding *binding) {
     Object *as_is = clone(car(arguments));
     destroy(arguments);
     return as_is;
 }
 
-static Object *set(Object *arguments, ErrorHandler error, Dictionary *dictionary) {
+static Object *set(Object *arguments, ErrorHandler error, Binding *binding) {
     char *identifier = value(car(arguments));
-    add(dictionary, identifier, clone(car(cdr(arguments))));
+    add(binding, identifier, clone(car(cdr(arguments))));
     destroy(arguments);
     return nil();
 }
 
-static Object *setq(Object *arguments, ErrorHandler error, Dictionary *dictionary) {
+static Object *setq(Object *arguments, ErrorHandler error, Binding *binding) {
     char *identifier = value(car(arguments));
-    add(dictionary, identifier, eval(clone(car(cdr(arguments))), error, dictionary));
+    add(binding, identifier, eval(clone(car(cdr(arguments))), error, binding));
     destroy(arguments);
     return nil();
 }
 
-static Object *plus(Object *arguments, ErrorHandler error, Dictionary *dictionary) {
+static Object *plus(Object *arguments, ErrorHandler error, Binding *binding) {
     long total = 0L;
     Object *tail;
     while (! is_nil(arguments)) {

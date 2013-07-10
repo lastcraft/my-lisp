@@ -3,9 +3,9 @@
 
 #include "type.h"
 #include "exception.h"
-#include "dictionary.h"
+#include "binding.h"
 
-typedef Object *(*Callable)(Object *, ErrorHandler, Dictionary *);
+typedef Object *(*Callable)(Object *, ErrorHandler, Binding *);
 typedef struct BuiltIn_ BuiltIn;
 typedef struct Lambda_ Lambda;
 Type *built_in_type;

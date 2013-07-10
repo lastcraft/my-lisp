@@ -1,4 +1,4 @@
-#include "dictionary.h"
+#include "binding.h"
 #include "type.h"
 #include <stdlib.h>
 #include <string.h>
@@ -10,21 +10,21 @@ struct Entry_ {
     Object *object;
 };
 
-struct Dictionary_ {
+struct Binding_ {
     Entry *first;
 };
 
-Entry **vacancy(Dictionary *);
+Entry **vacancy(Binding *);
 static int key_matches(char *, char *);
 
-Dictionary *create_dictionary(void) {
-    Dictionary *dictionary = (Dictionary *)malloc(sizeof(Dictionary));
-    dictionary->first = NULL;
-    return dictionary;
+Binding *create_binding(Binding *parent) {
+    Binding *binding = (Binding *)malloc(sizeof(Binding));
+    binding->first = NULL;
+    return binding;
 }
 
-void free_dictionary(Dictionary *dictionary) {
-    Entry *entry = dictionary->first;
+Binding *free_binding(Binding *binding) {
+    Entry *entry = binding->first;
     while (entry != NULL) {
         Entry *next = entry->next;
         free(entry->key);
@@ -32,19 +32,20 @@ void free_dictionary(Dictionary *dictionary) {
         free(entry);
         entry = next;
     }
-    free(dictionary);
+    free(binding);
+    return NULL;
 }
 
-void add(Dictionary *dictionary, char *key, Object *object) {
-    Entry **slot = vacancy(dictionary);
+void add(Binding *binding, char *key, Object *object) {
+    Entry **slot = vacancy(binding);
     *slot = (Entry *)malloc(sizeof(Entry));
     (*slot)->next = NULL;
     (*slot)->key = strdup(key);
     (*slot)->object = object;
 }
 
-Object *find(Dictionary *dictionary, char *key) {
-    Entry *entry = dictionary->first;
+Object *find(Binding *binding, char *key) {
+    Entry *entry = binding->first;
     while (entry != NULL) {
         if (key_matches(key, entry->key)) {
             return entry->object;
@@ -54,8 +55,8 @@ Object *find(Dictionary *dictionary, char *key) {
     return NULL;
 }
 
-Entry **vacancy(Dictionary *dictionary) {
-    Entry **slot = &(dictionary->first);
+Entry **vacancy(Binding *binding) {
+    Entry **slot = &(binding->first);
     while (*slot != NULL) {
         slot = &((*slot)->next);
     }
