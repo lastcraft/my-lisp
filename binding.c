@@ -15,6 +15,7 @@ struct Binding_ {
     Entry *first;
 };
 
+static Entry *create_entry(Entry *, char *, Object *);
 static Object *free_entry(Entry *);
 static Entry **vacancy(Binding *);
 static Entry **find_owner(Binding *, char *);
@@ -40,11 +41,12 @@ Binding *free_binding(Binding *binding) {
 }
 
 void add(Binding *binding, char *key, Object *object) {
+    Object *previous = extract(binding, key);
+    if (previous != NULL) {
+        destroy(previous);
+    }
     Entry **slot = vacancy(binding);
-    *slot = (Entry *)malloc(sizeof(Entry));
-    (*slot)->next = NULL;
-    (*slot)->key = strdup(key);
-    (*slot)->object = object;
+    *slot = create_entry(NULL, key, object);
 }
 
 Object *extract(Binding *binding, char *key) {
@@ -66,6 +68,14 @@ Object *find(Binding *binding, char *key) {
         entry = entry->next;
     }
     return NULL;
+}
+
+static Entry *create_entry(Entry *next, char *key, Object *object) {
+    Entry *entry = (Entry *)malloc(sizeof(Entry));
+    entry->next = NULL;
+    entry->key = strdup(key);
+    entry->object = object;
+    return entry;
 }
 
 static Object *free_entry(Entry *entry) {
