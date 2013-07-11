@@ -90,8 +90,9 @@ static Object *eval_call(Object *identifier, Object *arguments, ErrorHandler err
 static Object *eval_identifier(Object *identifier, ErrorHandler error, Binding *binding) {
     Object *found;
     if (! (found = find(binding, (char *)value(identifier)))) {
-        return error("Unkown identifier", identifier);
+        return identifier;
     } else {
+        destroy(identifier);
         return clone(found);
     }
 }
