@@ -41,12 +41,16 @@ Binding *free_binding(Binding *binding) {
 }
 
 void add(Binding *binding, char *key, Object *object) {
+    Entry **slot = vacancy(binding);
+    *slot = create_entry(NULL, key, object);
+}
+
+void overwrite(Binding *binding, char *key, Object *object) {
     Object *previous = extract(binding, key);
     if (previous != NULL) {
         destroy(previous);
     }
-    Entry **slot = vacancy(binding);
-    *slot = create_entry(NULL, key, object);
+    add(binding, key, object);
 }
 
 Object *extract(Binding *binding, char *key) {

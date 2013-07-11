@@ -12,6 +12,7 @@ static Object *quit(Object *, ErrorHandler, Binding *);
 static Object *quote(Object *, ErrorHandler, Binding *);
 static Object *set(Object *, ErrorHandler, Binding *);
 static Object *setq(Object *, ErrorHandler, Binding *);
+static Object *set_value(Object *, Object *, ErrorHandler, Binding *);
 static Object *plus(Object *, ErrorHandler, Binding *);
 
 void declare_standard_library(Binding *binding) {
@@ -36,16 +37,26 @@ static Object *quote(Object *arguments, ErrorHandler error, Binding *binding) {
 }
 
 static Object *set(Object *arguments, ErrorHandler error, Binding *binding) {
-    char *identifier = value(car(arguments));
-    add(binding, identifier, clone(car(cdr(arguments))));
+    Object *symbol = clone(car(arguments));
+    Object *rvalue = clone(car(cdr(arguments)));
     destroy(arguments);
-    return nil();
+    return set_value(symbol, rvalue, error, binding);
 }
 
 static Object *setq(Object *arguments, ErrorHandler error, Binding *binding) {
-    char *identifier = value(car(arguments));
-    add(binding, identifier, eval(clone(car(cdr(arguments))), error, binding));
+    Object *symbol = clone(car(arguments));
+    Object *rvalue = eval(clone(car(cdr(arguments))), error, binding);
     destroy(arguments);
+    return set_value(symbol, rvalue, error, binding);
+}
+
+static Object *set_value(Object *symbol, Object *rvalue, ErrorHandler error, Binding *binding) {
+    char *identifier = (char *)value(symbol);
+    if (NULL != find(binding, identifier)) {
+        destroy(rvalue);
+        return error("Already declared", symbol);
+    }
+    add(binding, identifier, rvalue);
     return nil();
 }
 
