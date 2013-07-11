@@ -98,7 +98,7 @@ static Object *defun(Object *arguments, ErrorHandler error, Binding *binding) {
     Object *lambda_arguments = clone(cdr(arguments));
     destroy(arguments);
     Object *new_lambda = lambda_built_in(lambda_arguments, error, binding);
-    return set_value(symbol, new_lambda, error, binding);
+    return overwrite_value(symbol, new_lambda, binding);
 }
 
 static Object *plus(Object *arguments, ErrorHandler error, Binding *binding) {
