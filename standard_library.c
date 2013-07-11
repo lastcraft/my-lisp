@@ -11,8 +11,11 @@
 static Object *quit(Object *, ErrorHandler, Binding *);
 static Object *quote(Object *, ErrorHandler, Binding *);
 static Object *set(Object *, ErrorHandler, Binding *);
+static Object *set_pling(Object *, ErrorHandler, Binding *);
 static Object *setq(Object *, ErrorHandler, Binding *);
+static Object *setq_pling(Object *, ErrorHandler, Binding *);
 static Object *set_value(Object *, Object *, ErrorHandler, Binding *);
+static Object *overwrite_value(Object *, Object *, Binding *);
 static Object *plus(Object *, ErrorHandler, Binding *);
 
 void declare_standard_library(Binding *binding) {
@@ -20,7 +23,9 @@ void declare_standard_library(Binding *binding) {
     add(binding, "exit", built_in(quit));
     add(binding, "quote", special_form(built_in(quote)));
     add(binding, "set", built_in(set));
+    add(binding, "set!", built_in(set_pling));
     add(binding, "setq", special_form(built_in(setq)));
+    add(binding, "setq!", special_form(built_in(setq_pling)));
     add(binding, "+", built_in(plus));
 }
 
@@ -43,6 +48,13 @@ static Object *set(Object *arguments, ErrorHandler error, Binding *binding) {
     return set_value(symbol, rvalue, error, binding);
 }
 
+static Object *set_pling(Object *arguments, ErrorHandler error, Binding *binding) {
+    Object *symbol = clone(car(arguments));
+    Object *rvalue = clone(car(cdr(arguments)));
+    destroy(arguments);
+    return overwrite_value(symbol, rvalue, binding);
+}
+
 static Object *setq(Object *arguments, ErrorHandler error, Binding *binding) {
     Object *symbol = clone(car(arguments));
     Object *rvalue = eval(clone(car(cdr(arguments))), error, binding);
@@ -50,13 +62,31 @@ static Object *setq(Object *arguments, ErrorHandler error, Binding *binding) {
     return set_value(symbol, rvalue, error, binding);
 }
 
+static Object *setq_pling(Object *arguments, ErrorHandler error, Binding *binding) {
+    Object *symbol = clone(car(arguments));
+    Object *rvalue = eval(clone(car(cdr(arguments))), error, binding);
+    destroy(arguments);
+    return overwrite_value(symbol, rvalue, binding);
+}
+
 static Object *set_value(Object *symbol, Object *rvalue, ErrorHandler error, Binding *binding) {
+    if (! is_identifier(symbol)) {
+        destroy(rvalue);
+        return error("Not an identifier", symbol);
+    }
     char *identifier = (char *)value(symbol);
     if (NULL != find(binding, identifier)) {
         destroy(rvalue);
         return error("Already declared", symbol);
     }
     add(binding, identifier, rvalue);
+    destroy(symbol);
+    return nil();
+}
+
+static Object *overwrite_value(Object *symbol, Object *rvalue, Binding *binding) {
+    overwrite(binding, (char *)value(symbol), rvalue);
+    destroy(symbol);
     return nil();
 }
 
