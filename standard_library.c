@@ -14,6 +14,7 @@ static Object *set(Object *, ErrorHandler, Binding *);
 static Object *set_pling(Object *, ErrorHandler, Binding *);
 static Object *setq(Object *, ErrorHandler, Binding *);
 static Object *setq_pling(Object *, ErrorHandler, Binding *);
+static Object *lambda_built_in(Object *, ErrorHandler, Binding *);
 static Object *defun(Object *, ErrorHandler, Binding *);
 static Object *plus(Object *, ErrorHandler, Binding *);
 static Object *set_value(Object *, Object *, ErrorHandler, Binding *);
@@ -28,6 +29,7 @@ void declare_standard_library(Binding *binding) {
     add(binding, "set!", built_in(set_pling));
     add(binding, "setq", special_form(built_in(setq)));
     add(binding, "setq!", special_form(built_in(setq_pling)));
+    add(binding, "lambda", special_form(built_in(lambda_built_in)));
     add(binding, "defun", special_form(built_in(defun)));
     add(binding, "+", built_in(plus));
 }
@@ -72,26 +74,30 @@ static Object *setq_pling(Object *arguments, ErrorHandler error, Binding *bindin
     return overwrite_value(symbol, rvalue, binding);
 }
 
+static Object *lambda_built_in(Object *arguments, ErrorHandler error, Binding *binding) {
+    Object *parameters = clone(car(arguments));
+    if (! is_argument_list(parameters)) {
+        destroy(arguments);
+        return error("Not an argument list", parameters);
+    }
+    Object *block = clone(car(cdr(arguments)));
+    if (! is_pair(block)) {
+        destroy(parameters);
+        destroy(arguments);
+        return error("Not a code block", block);
+    }
+    return lambda(parameters, block);
+}
+
 static Object *defun(Object *arguments, ErrorHandler error, Binding *binding) {
     Object *symbol = clone(car(arguments));
     if (! is_identifier(symbol)) {
         destroy(arguments);
         return error("Not an identifier", symbol);
     }
-    Object *parameters = clone(car(cdr(arguments)));
-    if (! is_argument_list(parameters)) {
-        destroy(symbol);
-        destroy(arguments);
-        return error("Not an argument list", parameters);
-    }
-    Object *block = clone(car(cdr(cdr(arguments))));
-    if (! is_pair(block)) {
-        destroy(symbol);
-        destroy(parameters);
-        destroy(arguments);
-        return error("Not a code block", block);
-    }
-    Object *new_lambda = lambda(parameters, block);
+    Object *lambda_arguments = clone(cdr(arguments));
+    destroy(arguments);
+    Object *new_lambda = lambda_built_in(lambda_arguments, error, binding);
     return set_value(symbol, new_lambda, error, binding);
 }
 
