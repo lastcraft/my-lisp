@@ -7,7 +7,7 @@ struct BuiltIn_ {
 };
 
 struct Lambda_ {
-    Object *arguments;
+    Object *parameters;
     Object *body;
     int special_form;
 };
@@ -27,9 +27,9 @@ Object *built_in(Callable code) {
     return wrap(built_in_type, (void *)built_in);
 }
 
-Object *lambda(Object *arguments, Object *body) {
+Object *lambda(Object *parameters, Object *body) {
     Lambda *lambda = (Lambda *)malloc(sizeof(Lambda));
-    lambda->arguments = arguments;
+    lambda->parameters = parameters;
     lambda->body = body;
     lambda->special_form = 0;
     return wrap(lambda_type, (void *)lambda);
@@ -37,6 +37,14 @@ Object *lambda(Object *arguments, Object *body) {
 
 Callable code(BuiltIn *built_in) {
     return built_in->code;
+}
+
+Object *body(Object *function) {
+    return ((Lambda *)value(function))->body;
+}
+
+Object *parameters(Object *function) {
+    return ((Lambda *)value(function))->parameters;
 }
 
 Object *special_form(Object *function) {
@@ -74,7 +82,7 @@ static void built_in_writer(void *built_in, Printf printer) {
 
 static void lambda_writer(void *lambda, Printf printer) {
     printer("<Lambda: ");
-    write_object(((Lambda *)lambda)->arguments, printer);
+    write_object(((Lambda *)lambda)->parameters, printer);
     printer(" ");
     write_object(((Lambda *)lambda)->body, printer);
     printer(">");

@@ -13,6 +13,8 @@ static Object *eval_identifier(Object *, ErrorHandler, Binding *);
 static Object *eval_arguments(Object *, ErrorHandler, Binding *);
 static Object *eval_arguments_onto(Object *, Object *, ErrorHandler, Binding *);
 static Object *execute(Callable, Object *, ErrorHandler, Binding *);
+static Object *eval_lambda(Object *block, Object *parameters, Object *arguments, ErrorHandler error, Binding *binding);
+static void bind_parameters(Object *, Object *, ErrorHandler, Binding *);
 
 void create_interpreter(void) {
     declare_nil();
@@ -50,9 +52,19 @@ Object *apply(Object *function, Object *arguments, ErrorHandler error, Binding *
         if (! is_special_form(function)) {
             arguments = eval_arguments(arguments, error, binding);
         }
-        return execute(code((BuiltIn *)value(function)), arguments, error, binding);
+        Callable built_in_code = code((BuiltIn *)value(function));
+        destroy(function);
+        return execute(built_in_code, arguments, error, binding);
+    } else if (is_lambda(function)) {
+        arguments = eval_arguments(arguments, error, binding);
+        Object *lambda_body = body(function);
+        Object *lambda_parameters = parameters(function);
+        destroy(function);
+        return eval_lambda(lambda_body, lambda_parameters, arguments, error, binding);
+    } else {
+        destroy(arguments);
+        return error("Not a known function type", function);
     }
-    return nil();
 }
 
 static Object *eval_arguments(Object *arguments, ErrorHandler error, Binding *binding) {
@@ -84,7 +96,7 @@ static Object *eval_call(Object *identifier, Object *arguments, ErrorHandler err
         return error("Identifier does not refer to a function", (void *)identifier);
     }
     destroy(identifier);
-    return apply(function, arguments, error, binding);
+    return apply(clone(function), arguments, error, binding);
 }
 
 static Object *eval_identifier(Object *identifier, ErrorHandler error, Binding *binding) {
@@ -99,4 +111,28 @@ static Object *eval_identifier(Object *identifier, ErrorHandler error, Binding *
 
 static Object *execute(Callable code, Object *arguments, ErrorHandler error, Binding *binding) {
     return (*code)(arguments, error, binding);
+}
+
+static Object *eval_lambda(Object *body, Object *parameters, Object *arguments, ErrorHandler error, Binding *binding) {
+    bind_parameters(parameters, arguments, error, binding);
+    return eval(body, error, binding);
+}
+
+static void bind_parameters(Object *parameters, Object *arguments, ErrorHandler error, Binding *binding) {
+    if (is_nil(parameters)) {
+        return;
+    }
+    if (is_nil(arguments)) {
+        destroy(arguments);
+        error("Too few arguments for", clone(car(parameters)));
+    }
+    if (! is_identifier(car(parameters))) {
+        destroy(arguments);
+        error("Bad function parameter", clone(car(parameters)));
+    }
+    Object *argument = clone(car(arguments));
+    add(binding, (char *)value(car(parameters)), argument);
+    Object *remaining_arguments = clone(cdr(arguments));
+    destroy(arguments);
+    return bind_parameters(cdr(parameters), remaining_arguments, error, binding);
 }
