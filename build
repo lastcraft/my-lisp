@@ -1,3 +1,3 @@
 yacc -d parser.y
 lex parser.l
-cc lex.yy.c y.tab.c type.c nil.c atoms.c pair.c stack.c exception.c binding.c function.c exit.c standard_library.c interpreter.c repl.c -ll -ly -o lisp
+cc -g lex.yy.c y.tab.c type.c nil.c atoms.c pair.c stack.c exception.c binding.c function.c exit.c standard_library.c interpreter.c repl.c -ll -ly -o lisp

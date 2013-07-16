@@ -18,6 +18,7 @@ static void print(Object *value);
 static void print_error(char *, Object *);
 
 int main(int argc, char **argv) {
+    enable_exceptions();
     create_interpreter();
     create_reader();
     do {
@@ -33,6 +34,7 @@ int main(int argc, char **argv) {
     } while (! exiting());
     free_reader();
     free_interpreter();
+    disable_exceptions();
     return exit_status;
 }
 
