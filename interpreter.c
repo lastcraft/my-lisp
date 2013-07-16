@@ -37,9 +37,10 @@ Binding *top_level(void) {
 
 Object *eval(Object *object, ErrorHandler error, Binding *binding) {
     if (is_pair(object)) {
-        Object *result = eval_call(clone(car(object)), clone(cdr(object)), error, binding);
+        Object *identifier = clone(car(object));
+        Object *arguments = clone(cdr(object));
         destroy(object);
-        return result;
+        return eval_call(clone(car(object)), clone(cdr(object)), error, binding);
     } else if (is_identifier(object)) {
         return eval_identifier(object, error, binding);
     } else {

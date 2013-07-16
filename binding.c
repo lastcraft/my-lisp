@@ -71,7 +71,7 @@ Object *find(Binding *binding, char *key) {
         }
         entry = entry->next;
     }
-    return NULL;
+    return (binding->parent == NULL ? NULL : find(binding->parent, key));
 }
 
 static Entry *create_entry(Entry *next, char *key, Object *object) {
