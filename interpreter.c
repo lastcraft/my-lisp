@@ -12,8 +12,10 @@ static Object *eval_call(Object *, Object *, ErrorHandler, Binding *);
 static Object *eval_identifier(Object *, ErrorHandler, Binding *);
 static Object *eval_arguments(Object *, ErrorHandler, Binding *);
 static Object *eval_arguments_onto(Object *, Object *, ErrorHandler, Binding *);
-static Object *execute(Callable, Object *, ErrorHandler, Binding *);
 static Object *eval_lambda(Object *block, Object *parameters, Object *arguments, ErrorHandler error, Binding *binding);
+static Object *apply_built_in(Object *, Object *, ErrorHandler, Binding *);
+static Object *apply_lambda(Object *, Object *, ErrorHandler, Binding *);
+static Object *execute(Callable, Object *, ErrorHandler, Binding *);
 static void bind_parameters(Object *, Object *, ErrorHandler, Binding *);
 
 void create_interpreter(void) {
@@ -50,18 +52,9 @@ Object *eval(Object *object, ErrorHandler error, Binding *binding) {
 
 Object *apply(Object *function, Object *arguments, ErrorHandler error, Binding *binding) {
     if (is_built_in(function)) {
-        if (! is_special_form(function)) {
-            arguments = eval_arguments(arguments, error, binding);
-        }
-        Callable built_in_code = code((BuiltIn *)value(function));
-        destroy(function);
-        return execute(built_in_code, arguments, error, binding);
+        return apply_built_in(function, arguments, error, binding);
     } else if (is_lambda(function)) {
-        arguments = eval_arguments(arguments, error, binding);
-        Object *lambda_body = body(function);
-        Object *lambda_parameters = parameters(function);
-        destroy(function);
-        return eval_lambda(lambda_body, lambda_parameters, arguments, error, binding);
+        return apply_lambda(function, arguments, error, binding);
     } else {
         destroy(arguments);
         return error("Not a known function type", function);
@@ -110,13 +103,39 @@ static Object *eval_identifier(Object *identifier, ErrorHandler error, Binding *
     }
 }
 
-static Object *execute(Callable code, Object *arguments, ErrorHandler error, Binding *binding) {
-    return (*code)(arguments, error, binding);
+static Object *eval_lambda(Object *body, Object *parameters, Object *arguments, ErrorHandler error, Binding *binding) {
+    binding = create_binding(binding);
+    Object *result = NULL;
+    Try {
+        bind_parameters(parameters, arguments, error, binding);
+        result = eval(body, error, binding);
+        free_binding(binding);
+    } Catch {
+        free_binding(binding);
+        return rethrow();
+    }
+    return result;
 }
 
-static Object *eval_lambda(Object *body, Object *parameters, Object *arguments, ErrorHandler error, Binding *binding) {
-    bind_parameters(parameters, arguments, error, binding);
-    return eval(body, error, binding);
+static Object *apply_built_in(Object *function, Object *arguments, ErrorHandler error, Binding *binding) {
+    if (! is_special_form(function)) {
+        arguments = eval_arguments(arguments, error, binding);
+    }
+    Callable built_in_code = code((BuiltIn *)value(function));
+    destroy(function);
+    return execute(built_in_code, arguments, error, binding);
+}
+
+static Object *apply_lambda(Object *function, Object *arguments, ErrorHandler error, Binding *binding) {
+    arguments = eval_arguments(arguments, error, binding);
+    Object *lambda_body = clone(body(function));
+    Object *lambda_parameters = clone(parameters(function));
+    destroy(function);
+    return eval_lambda(lambda_body, lambda_parameters, arguments, error, binding);
+}
+
+static Object *execute(Callable code, Object *arguments, ErrorHandler error, Binding *binding) {
+    return (*code)(arguments, error, binding);
 }
 
 static void bind_parameters(Object *parameters, Object *arguments, ErrorHandler error, Binding *binding) {
