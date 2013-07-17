@@ -14,10 +14,11 @@ struct Lambda_ {
 
 static void built_in_writer(void *, Printf);
 static void lambda_writer(void *, Printf);
+static void destroy_lambda(void *);
 
 void declare_functions(void) {
     built_in_type = declare(free, built_in_writer);
-    lambda_type = declare(free, lambda_writer);
+    lambda_type = declare(destroy_lambda, lambda_writer);
 }
 
 Object *built_in(Callable code) {
@@ -39,12 +40,12 @@ Callable code(BuiltIn *built_in) {
     return built_in->code;
 }
 
-Object *body(Object *function) {
-    return ((Lambda *)value(function))->body;
-}
-
 Object *parameters(Object *function) {
     return ((Lambda *)value(function))->parameters;
+}
+
+Object *body(Object *function) {
+    return ((Lambda *)value(function))->body;
 }
 
 Object *special_form(Object *function) {
@@ -86,4 +87,10 @@ static void lambda_writer(void *lambda, Printf printer) {
     printer(" ");
     write_object(((Lambda *)lambda)->body, printer);
     printer(">");
+}
+
+static void destroy_lambda(void *lambda) {
+    destroy(((Lambda *)lambda)->parameters);
+    destroy(((Lambda *)lambda)->body);
+    free(lambda);
 }

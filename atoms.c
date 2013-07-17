@@ -3,16 +3,33 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
+static void boolean_writer(void *, Printf);
 static void number_writer(void *, Printf);
 static void identifier_writer(void *, Printf);
 static void string_writer(void *, Printf);
 static long last(char *);
 
 void declare_atoms(void) {
+    boolean_type = declare(free, boolean_writer);
     number_type = declare(free, number_writer);
     identifier_type = declare(free, identifier_writer);
     string_type = declare(free, string_writer);
+}
+
+Object *boolean(bool true_or_false) {
+    bool *cell = (bool *)malloc(sizeof(bool));
+    *cell = true_or_false;
+    return wrap(boolean_type, cell);
+}
+
+int is_boolean(Object *boolean) {
+    return is_a(boolean_type, boolean);
+}
+
+static void boolean_writer(void *boolean, Printf printer) {
+    printer("%s", *(bool *)boolean == true ? "true" : "false");
 }
 
 Object *number(long number) {

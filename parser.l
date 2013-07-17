@@ -1,5 +1,6 @@
 %{
 
+#include <stdbool.h>
 #include "y.tab.h"
 
 %}
@@ -8,6 +9,16 @@
 
 \(\) {
     return NIL;
+}
+
+true {
+    yylval.b = true;
+    return BOOLEAN;
+}
+
+false {
+    yylval.b = false;
+    return BOOLEAN;
 }
 
 [0-9]+ {

@@ -7,6 +7,7 @@
 #include "stack.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 Stack *input = NULL;
 
@@ -52,11 +53,13 @@ static Object *pour_stack_into_list(Object *list, Stack *stack) {
 %}
 
 %token NIL
+%token <b> BOOLEAN
 %token <l> NUMBER
 %token <s> IDENTIFIER
 %token <s> QUOTED_STRING
 
 %union {
+    bool b;
     long l;
     char *s;
 }
@@ -102,7 +105,10 @@ elements: element | elements element;
 element: atom
     | list;
     
-atom: NUMBER {
+atom: BOOLEAN {
+        push((Stack *)peek(input), (void *)boolean($1));
+    }
+    | NUMBER {
         push((Stack *)peek(input), (void *)number($1));
     }
     | IDENTIFIER {
