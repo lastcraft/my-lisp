@@ -1,5 +1,6 @@
 #include "atoms.h"
 #include "type.h"
+#include "nil.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -26,6 +27,14 @@ Object *boolean(bool true_or_false) {
 
 int is_boolean(Object *boolean) {
     return is_a(boolean_type, boolean);
+}
+
+bool is_true(Object *condition) {
+    return ! is_false(condition);
+}
+
+bool is_false(Object *condition) {
+    return is_nil(condition) || (is_boolean(condition) && (*(bool *)value(condition) == false));
 }
 
 static void boolean_writer(void *boolean, Printf printer) {

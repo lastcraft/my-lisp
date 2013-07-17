@@ -16,6 +16,7 @@ static Object *setq(Object *, ErrorHandler, Binding *);
 static Object *setq_pling(Object *, ErrorHandler, Binding *);
 static Object *lambda_built_in(Object *, ErrorHandler, Binding *);
 static Object *defun(Object *, ErrorHandler, Binding *);
+static Object *branch(Object *, ErrorHandler, Binding *);
 static Object *plus(Object *, ErrorHandler, Binding *);
 static Object *set_value(Object *, Object *, ErrorHandler, Binding *);
 static Object *overwrite_value(Object *, Object *, Binding *);
@@ -31,6 +32,7 @@ void declare_standard_library(Binding *binding) {
     add(binding, "setq!", special_form(built_in(setq_pling)));
     add(binding, "lambda", special_form(built_in(lambda_built_in)));
     add(binding, "defun", special_form(built_in(defun)));
+    add(binding, "if", special_form(built_in(branch)));
     add(binding, "+", built_in(plus));
 }
 
@@ -99,6 +101,24 @@ static Object *defun(Object *arguments, ErrorHandler error, Binding *binding) {
     destroy(arguments);
     Object *new_lambda = lambda_built_in(lambda_arguments, error, binding);
     return overwrite_value(symbol, new_lambda, binding);
+}
+
+static Object *branch(Object *arguments, ErrorHandler error, Binding *binding) {
+    Object *condition = eval(clone(car(arguments)), error, binding);
+    Object *true_block = clone(car(cdr(arguments)));
+    Object *false_block = clone(car(cdr(cdr(arguments))));
+    destroy(arguments);
+    Object *result;
+    Try {
+        result = eval(is_true(condition) ? true_block : false_block, error, binding);
+        destroy(is_true(condition) ? false_block : true_block);
+        destroy(condition);
+    } Catch {
+        destroy(is_true(condition) ? false_block : true_block);
+        destroy(condition);
+        rethrow();
+    }
+    return result;
 }
 
 static Object *plus(Object *arguments, ErrorHandler error, Binding *binding) {

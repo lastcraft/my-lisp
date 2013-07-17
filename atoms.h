@@ -12,6 +12,8 @@ Type *string_type;
 void declare_atoms(void);
 Object *boolean(bool);
 int is_boolean(Object *);
+bool is_true(Object *);
+bool is_false(Object *);
 Object *number(long);
 int is_number(Object *);
 Object *identifier(char *);
