@@ -104,19 +104,35 @@ static Object *defun(Object *arguments, ErrorHandler error, Binding *binding) {
 }
 
 static Object *branch(Object *arguments, ErrorHandler error, Binding *binding) {
-    Object *condition = eval(clone(car(arguments)), error, binding);
+    bool condition;
+    Try {
+        condition = is_true(eval(clone(car(arguments)), error, binding));
+    } Catch {
+        destroy(arguments);
+        return rethrow();
+    }
     Object *true_block = clone(car(cdr(arguments)));
+    if (is_nil(true_block)) {
+        destroy(arguments);
+        return error("No block to execute", nil());
+    }
     Object *false_block = clone(car(cdr(cdr(arguments))));
     destroy(arguments);
     Object *result;
     Try {
-        result = eval(is_true(condition) ? true_block : false_block, error, binding);
-        destroy(is_true(condition) ? false_block : true_block);
-        destroy(condition);
+        if (condition) {
+            result = eval(true_block, error, binding);
+            destroy(false_block);
+        } else if (! is_nil(false_block)) {
+            result = eval(false_block, error, binding);
+            destroy(true_block);
+        } else {
+            destroy(true_block);
+            destroy(false_block);
+        }
     } Catch {
-        destroy(is_true(condition) ? false_block : true_block);
-        destroy(condition);
-        rethrow();
+        destroy(condition ? false_block : true_block);
+        return rethrow();
     }
     return result;
 }
