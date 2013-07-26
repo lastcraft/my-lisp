@@ -31,7 +31,7 @@ false {
     return QUOTED_STRING;
 }
 
-[a-zA-Z_<>!?*/+-][a-zA-Z0-9_<>!?+*/-]* {
+[a-zA-Z_<>!?*/=+-][a-zA-Z0-9_<>!?=+*/-]* {
     yylval.s = yytext;
     return IDENTIFIER;
 }

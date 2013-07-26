@@ -17,10 +17,12 @@ static Object *setq_pling(Object *, ErrorHandler, Binding *);
 static Object *lambda_built_in(Object *, ErrorHandler, Binding *);
 static Object *defun(Object *, ErrorHandler, Binding *);
 static Object *branch(Object *, ErrorHandler, Binding *);
+static Object *numerically_equal(Object *, ErrorHandler, Binding *);
 static Object *plus(Object *, ErrorHandler, Binding *);
 static Object *set_value(Object *, Object *, ErrorHandler, Binding *);
 static Object *overwrite_value(Object *, Object *, Binding *);
 static int is_argument_list(Object *);
+static bool compare_numbers(long, Object *, ErrorHandler);
 
 void declare_standard_library(Binding *binding) {
     add(binding, "quit", built_in(quit));
@@ -33,6 +35,7 @@ void declare_standard_library(Binding *binding) {
     add(binding, "lambda", special_form(built_in(lambda_built_in)));
     add(binding, "defun", special_form(built_in(defun)));
     add(binding, "if", special_form(built_in(branch)));
+    add(binding, "=", built_in(numerically_equal));
     add(binding, "+", built_in(plus));
 }
 
@@ -129,6 +132,23 @@ static Object *branch(Object *arguments, ErrorHandler error, Binding *binding) {
     return nil();
 }
 
+static Object *numerically_equal(Object *arguments, ErrorHandler error, Binding *binding) {
+    if (is_nil(car(arguments))) {
+        destroy(arguments);
+        return error("Nothing to compare", nil());
+    }
+    Object *comparison = clone(car(arguments));
+    if (! is_number(comparison)) {
+        destroy(arguments);
+        return error("Must be a number", comparison);
+    }
+    long number_to_compare = (long)value(comparison);
+    destroy(comparison);
+    Object *remainder = clone(cdr(arguments));
+    destroy(arguments);
+    return boolean(compare_numbers(number_to_compare, remainder, error));
+}
+
 static Object *plus(Object *arguments, ErrorHandler error, Binding *binding) {
     long total = 0L;
     Object *tail;
@@ -170,4 +190,24 @@ static Object *overwrite_value(Object *symbol, Object *rvalue, Binding *binding)
 
 static int is_argument_list(Object *list) {
     return 1;
+}
+
+static bool compare_numbers(long comparison, Object *arguments, ErrorHandler error) {
+    if (is_nil(arguments)) {
+        destroy(arguments);
+        return true;
+    }
+    Object *first = clone(car(arguments));
+    if (! is_number(first)) {
+        destroy(arguments);
+        return error("Must be a number", first);
+    }
+    if (comparison != (long)value(first)) {
+        destroy(arguments);
+        destroy(first);
+        return false;
+    }
+    Object *remainder = clone(cdr(arguments));
+    destroy(arguments);
+    return compare_numbers(comparison, remainder, error);
 }
