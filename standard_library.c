@@ -19,6 +19,7 @@ static Object *defun(Object *, ErrorHandler, Binding *);
 static Object *branch(Object *, ErrorHandler, Binding *);
 static Object *numerically_equal(Object *, ErrorHandler, Binding *);
 static Object *plus(Object *, ErrorHandler, Binding *);
+static Object *minus(Object *, ErrorHandler, Binding *);
 static Object *nil_p(Object *, ErrorHandler, Binding *);
 static Object *set_value(Object *, Object *, ErrorHandler, Binding *);
 static Object *overwrite_value(Object *, Object *, Binding *);
@@ -38,6 +39,7 @@ void declare_standard_library(Binding *binding) {
     add(binding, "if", special_form(built_in(branch)));
     add(binding, "=", built_in(numerically_equal));
     add(binding, "+", built_in(plus));
+    add(binding, "-", built_in(minus));
     add(binding, "nil?", built_in(nil_p));
 }
 
@@ -167,6 +169,31 @@ static Object *plus(Object *arguments, ErrorHandler error, Binding *binding) {
         arguments = tail;
     }
     return number(total);
+}
+
+static Object *minus(Object *arguments, ErrorHandler error, Binding *binding) {
+    if (is_nil(arguments)) {
+        return error("Starting value needed for subtraction", arguments);
+    }
+    Object *first = clone(car(arguments));
+    if (! is_number(first)) {
+        destroy(arguments);
+        return error("Number expected", first);
+    }
+    if (is_nil(cdr(arguments))) {
+        destroy(arguments);
+        return first;
+    }
+    Object *second = clone(car(cdr(arguments)));
+    if (! is_number(second)) {
+        destroy(arguments);
+        destroy(first);
+        return error("Number expected", second);
+    }
+    Object *result = number(*(long *)value(first) - *(long *)value(second));
+    destroy(first);
+    destroy(second);
+    return result;
 }
 
 static Object *nil_p(Object *arguments, ErrorHandler error, Binding *binding) {
