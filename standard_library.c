@@ -133,20 +133,20 @@ static Object *branch(Object *arguments, ErrorHandler error, Binding *binding) {
 }
 
 static Object *numerically_equal(Object *arguments, ErrorHandler error, Binding *binding) {
-    if (is_nil(car(arguments))) {
+    if (is_nil(arguments)) {
         destroy(arguments);
         return error("Nothing to compare", nil());
     }
-    Object *comparison = clone(car(arguments));
-    if (! is_number(comparison)) {
+    Object *initial = clone(car(arguments));
+    if (! is_number(initial)) {
         destroy(arguments);
-        return error("Must be a number", comparison);
+        return error("Must be a number", initial);
     }
-    long number_to_compare = (long)value(comparison);
-    destroy(comparison);
+    long comparison = *(long *)value(initial);
+    destroy(initial);
     Object *remainder = clone(cdr(arguments));
     destroy(arguments);
-    return boolean(compare_numbers(number_to_compare, remainder, error));
+    return boolean(compare_numbers(comparison, remainder, error));
 }
 
 static Object *plus(Object *arguments, ErrorHandler error, Binding *binding) {
@@ -202,7 +202,7 @@ static bool compare_numbers(long comparison, Object *arguments, ErrorHandler err
         destroy(arguments);
         return error("Must be a number", first);
     }
-    if (comparison != (long)value(first)) {
+    if (comparison != *(long *)value(first)) {
         destroy(arguments);
         destroy(first);
         return false;
