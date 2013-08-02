@@ -1,6 +1,8 @@
 #include "local.h"
 #include "type.h"
 #include "stack.h"
+#include <stdbool.h>
+#include <stdlib.h>
 
 typedef struct StackFrame_ {
     Object **vector;
@@ -57,9 +59,17 @@ static void add_to_frame(StackFrame *frame, Object *object) {
 }
 
 static bool found(StackFrame *frame, Object *object) {
-    
+    for (long i = 0; i < frame->size; i++) {
+        if (object == frame->vector[i]) {
+            return true;
+        }
+    }
+    return false;
 }
 
 static void ensure_space(StackFrame *frame) {
-    
+    if (frame->size == frame->used) {
+        frame->size *= 2;
+        frame->vector = (Object **)realloc(frame->vector, sizeof(Object *) * frame->size);
+    }
 }
