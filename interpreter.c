@@ -82,17 +82,18 @@ static Object *eval_arguments_onto(Object *target, Object *source, ErrorHandler 
     if (is_nil(source)) {
         return target;
     }
-    Object *evaluated = eval(clone(car(source)), error, binding);
-    Object *remaining = cdr(source);
-    return eval_arguments_onto(pair(clone(evaluated), target), remaining, error, binding);
+    return eval_arguments_onto(pair(eval(car(source), error, binding), target),
+                               cdr(source),
+                               error,
+                               binding);
 }
 
 static Object *eval_call(Object *identifier, Object *arguments, ErrorHandler error, Binding *binding) {
     if (! is_identifier(identifier)) {
         return error("Identifier expected", (void *)clone(identifier));
     }
-    Object *function;
-    if (! (function = find(binding, (char *)value(identifier)))) {
+    Object *function = find(binding, (char *)value(identifier));
+    if (function == NULL) {
         return error("Unknown identifier", (void *)clone(identifier));
     }
     if (! is_function(function)) {
@@ -102,19 +103,15 @@ static Object *eval_call(Object *identifier, Object *arguments, ErrorHandler err
 }
 
 static Object *eval_identifier(Object *identifier, ErrorHandler error, Binding *binding) {
-    Object *found;
-    if (! (found = find(binding, (char *)value(identifier)))) {
-        return clone(identifier);
-    } else {
-        return clone(found);
-    }
+    Object *found = find(binding, (char *)value(identifier));
+    return found != NULL ? clone(found) : clone(identifier);
 }
 
 static Object *eval_lambda(Object *body, Object *parameters, Object *arguments, ErrorHandler error, Binding *binding) {
     binding = create_binding(binding);
     Object *result = NULL;
     Try {
-        bind_parameters(clone(parameters), arguments, error, binding);
+        bind_parameters(parameters, arguments, error, binding);
         result = eval(clone(body), error, binding);
         free_binding(binding);
     } Catch {
