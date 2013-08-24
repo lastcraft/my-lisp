@@ -58,7 +58,7 @@ Object *apply(Object *function, Object *arguments, ErrorHandler error, Binding *
     if (is_built_in(function)) {
         return apply_built_in(function, arguments, error, binding);
     } else if (is_lambda(function)) {
-        return apply_lambda(function, clone(arguments), error, binding);
+        return apply_lambda(function, arguments, error, binding);
     } else {
         return error("Not a known function type", function);
     }
@@ -84,7 +84,6 @@ static Object *eval_arguments_onto(Object *target, Object *source, ErrorHandler 
     }
     Object *evaluated = eval(clone(car(source)), error, binding);
     Object *remaining = clone(cdr(source));
-    destroy(source);
     return eval_arguments_onto(pair(evaluated, target), remaining, error, binding);
 }
 
@@ -127,7 +126,7 @@ static Object *eval_lambda(Object *body, Object *parameters, Object *arguments, 
 
 static Object *apply_built_in(Object *function, Object *arguments, ErrorHandler error, Binding *binding) {
     if (! is_special_form(function)) {
-        arguments = eval_arguments(clone(arguments), error, binding);
+        arguments = eval_arguments(arguments, error, binding);
     }
     Callable built_in_code = code((BuiltIn *)value(function));
     destroy(function);
