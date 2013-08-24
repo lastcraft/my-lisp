@@ -60,7 +60,7 @@ Object *apply(Object *function, Object *arguments, ErrorHandler error, Binding *
     } else if (is_lambda(function)) {
         return apply_lambda(function, arguments, error, binding);
     } else {
-        return error("Not a known function type", function);
+        return error("Not a known function type", clone(function));
     }
 }
 
@@ -83,8 +83,8 @@ static Object *eval_arguments_onto(Object *target, Object *source, ErrorHandler 
         return target;
     }
     Object *evaluated = eval(clone(car(source)), error, binding);
-    Object *remaining = clone(cdr(source));
-    return eval_arguments_onto(pair(evaluated, target), remaining, error, binding);
+    Object *remaining = cdr(source);
+    return eval_arguments_onto(pair(clone(evaluated), target), remaining, error, binding);
 }
 
 static Object *eval_call(Object *identifier, Object *arguments, ErrorHandler error, Binding *binding) {
@@ -98,7 +98,7 @@ static Object *eval_call(Object *identifier, Object *arguments, ErrorHandler err
     if (! is_function(function)) {
         return error("Identifier does not refer to a function", (void *)clone(identifier));
     }
-    return apply(clone(function), arguments, error, binding);
+    return apply(local(function), arguments, error, binding);
 }
 
 static Object *eval_identifier(Object *identifier, ErrorHandler error, Binding *binding) {
@@ -114,8 +114,8 @@ static Object *eval_lambda(Object *body, Object *parameters, Object *arguments, 
     binding = create_binding(binding);
     Object *result = NULL;
     Try {
-        bind_parameters(parameters, arguments, error, binding);
-        result = eval(body, error, binding);
+        bind_parameters(clone(parameters), arguments, error, binding);
+        result = eval(clone(body), error, binding);
         free_binding(binding);
     } Catch {
         free_binding(binding);
@@ -129,16 +129,12 @@ static Object *apply_built_in(Object *function, Object *arguments, ErrorHandler 
         arguments = eval_arguments(arguments, error, binding);
     }
     Callable built_in_code = code((BuiltIn *)value(function));
-    destroy(function);
     return execute(built_in_code, arguments, error, binding);
 }
 
 static Object *apply_lambda(Object *function, Object *arguments, ErrorHandler error, Binding *binding) {
     arguments = eval_arguments(arguments, error, binding);
-    Object *lambda_body = clone(body(function));
-    Object *lambda_parameters = clone(parameters(function));
-    destroy(function);
-    return eval_lambda(lambda_body, lambda_parameters, arguments, error, binding);
+    return eval_lambda(body(function), parameters(function), arguments, error, binding);
 }
 
 static Object *execute(Callable code, Object *arguments, ErrorHandler error, Binding *binding) {
