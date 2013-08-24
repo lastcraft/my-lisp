@@ -56,9 +56,7 @@ Object *eval(Object *object, ErrorHandler error, Binding *binding) {
 
 Object *eval_object(Object *object, ErrorHandler error, Binding *binding) {
     if (is_pair(object)) {
-        Object *identifier = local(clone(car(object)));
-        Object *arguments = local(clone(cdr(object)));
-        return eval_call(identifier, arguments, error, binding);
+        return eval_call(car(object), cdr(object), error, binding);
     } else if (is_identifier(object)) {
         return eval_identifier(object, error, binding);
     } else {
