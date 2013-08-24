@@ -5,9 +5,11 @@
 #include "exit.h"
 #include "function.h"
 #include "binding.h"
+#include "local.h"
 #include "standard_library.h"
 
 static Binding *top_level_binding;
+static Object *eval_object(Object *, ErrorHandler, Binding *);
 static Object *eval_call(Object *, Object *, ErrorHandler, Binding *);
 static Object *eval_identifier(Object *, ErrorHandler, Binding *);
 static Object *eval_arguments(Object *, ErrorHandler, Binding *);
@@ -24,11 +26,13 @@ void create_interpreter(void) {
     declare_pair();
     declare_functions();
     declare_exit_code();
+    create_local();
     top_level_binding = create_binding(NULL);
     declare_standard_library(top_level_binding);
 }
 
 void free_interpreter(void) {
+    destroy_local();
     free_binding(top_level_binding);
     free_declarations();
 }
@@ -38,15 +42,27 @@ Binding *top_level(void) {
 }
 
 Object *eval(Object *object, ErrorHandler error, Binding *binding) {
+    Object *result;
+    create_local();
+    Try {
+        result = eval_object(local(object), error, binding);
+    } Catch {
+        destroy_local();
+        rethrow();
+    }
+    destroy_local();
+    return result;
+}
+
+Object *eval_object(Object *object, ErrorHandler error, Binding *binding) {
     if (is_pair(object)) {
         Object *identifier = clone(car(object));
         Object *arguments = clone(cdr(object));
-        destroy(object);
         return eval_call(identifier, arguments, error, binding);
     } else if (is_identifier(object)) {
         return eval_identifier(object, error, binding);
     } else {
-        return object;
+        return clone(object);
     }
 }
 
@@ -96,9 +112,8 @@ static Object *eval_call(Object *identifier, Object *arguments, ErrorHandler err
 static Object *eval_identifier(Object *identifier, ErrorHandler error, Binding *binding) {
     Object *found;
     if (! (found = find(binding, (char *)value(identifier)))) {
-        return identifier;
+        return clone(identifier);
     } else {
-        destroy(identifier);
         return clone(found);
     }
 }
