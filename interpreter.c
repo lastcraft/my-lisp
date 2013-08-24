@@ -54,24 +54,23 @@ Object *eval(Object *object, ErrorHandler error, Binding *binding) {
     return result;
 }
 
-Object *eval_object(Object *object, ErrorHandler error, Binding *binding) {
+Object *apply(Object *function, Object *arguments, ErrorHandler error, Binding *binding) {
+    if (is_built_in(function)) {
+        return apply_built_in(function, arguments, error, binding);
+    } else if (is_lambda(function)) {
+        return apply_lambda(function, clone(arguments), error, binding);
+    } else {
+        return error("Not a known function type", function);
+    }
+}
+
+static Object *eval_object(Object *object, ErrorHandler error, Binding *binding) {
     if (is_pair(object)) {
         return eval_call(car(object), cdr(object), error, binding);
     } else if (is_identifier(object)) {
         return eval_identifier(object, error, binding);
     } else {
         return clone(object);
-    }
-}
-
-Object *apply(Object *function, Object *arguments, ErrorHandler error, Binding *binding) {
-    if (is_built_in(function)) {
-        return apply_built_in(function, arguments, error, binding);
-    } else if (is_lambda(function)) {
-        return apply_lambda(function, arguments, error, binding);
-    } else {
-        destroy(arguments);
-        return error("Not a known function type", function);
     }
 }
 
@@ -100,7 +99,7 @@ static Object *eval_call(Object *identifier, Object *arguments, ErrorHandler err
     if (! is_function(function)) {
         return error("Identifier does not refer to a function", (void *)clone(identifier));
     }
-    return apply(clone(function), clone(arguments), error, binding);
+    return apply(clone(function), arguments, error, binding);
 }
 
 static Object *eval_identifier(Object *identifier, ErrorHandler error, Binding *binding) {
@@ -128,7 +127,7 @@ static Object *eval_lambda(Object *body, Object *parameters, Object *arguments, 
 
 static Object *apply_built_in(Object *function, Object *arguments, ErrorHandler error, Binding *binding) {
     if (! is_special_form(function)) {
-        arguments = eval_arguments(arguments, error, binding);
+        arguments = eval_arguments(clone(arguments), error, binding);
     }
     Callable built_in_code = code((BuiltIn *)value(function));
     destroy(function);
