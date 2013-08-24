@@ -57,28 +57,23 @@ static Object *quote(Object *arguments, ErrorHandler error, Binding *binding) {
 }
 
 static Object *set(Object *arguments, ErrorHandler error, Binding *binding) {
-    return set_value(car(arguments),
-                     car(cdr(arguments)),
-                     error,
-                     binding);
+    return set_value(car(arguments), cadr(arguments), error, binding);
 }
 
 static Object *set_pling(Object *arguments, ErrorHandler error, Binding *binding) {
-    return overwrite_value(car(arguments),
-                           car(cdr(arguments)),
-                           binding);
+    return overwrite_value(car(arguments), cadr(arguments), binding);
 }
 
 static Object *setq(Object *arguments, ErrorHandler error, Binding *binding) {
     return set_value(car(arguments),
-                     local(eval(car(cdr(arguments)), error, binding)),
+                     local(eval(cadr(arguments), error, binding)),
                      error,
                      binding);
 }
 
 static Object *setq_pling(Object *arguments, ErrorHandler error, Binding *binding) {
     return overwrite_value(car(arguments),
-                           local(eval(car(cdr(arguments)), error, binding)),
+                           local(eval(cadr(arguments), error, binding)),
                            binding);
 }
 
@@ -87,7 +82,7 @@ static Object *lambda_built_in(Object *arguments, ErrorHandler error, Binding *b
     if (! is_argument_list(parameters)) {
         return error("Not an argument list", clone(parameters));
     }
-    Object *block = car(cdr(arguments));
+    Object *block = cadr(arguments);
     if (! is_pair(block)) {
         return error("Not a code block", clone(block));
     }
@@ -104,15 +99,15 @@ static Object *defun(Object *arguments, ErrorHandler error, Binding *binding) {
 }
 
 static Object *branch(Object *arguments, ErrorHandler error, Binding *binding) {
-    bool condition = is_true(eval(clone(car(arguments)), error, binding));
-    Object *true_block = car(cdr(arguments));
+    bool condition = is_true(eval(car(arguments), error, binding));
+    Object *true_block = cadr(arguments);
     if (is_nil(true_block)) {
-        return error("No block to execute", true_block);
+        return error("No block to execute", clone(true_block));
     }
     if (condition) {
         return eval(true_block, error, binding);
     }
-    Object *false_block = car(cdr(cdr(arguments)));
+    Object *false_block = caddr(arguments);
     if (! is_nil(false_block)) {
         return eval(false_block, error, binding);
     }
@@ -147,30 +142,25 @@ static Object *minus(Object *arguments, ErrorHandler error, Binding *binding) {
     if (is_nil(arguments)) {
         return error("Starting value needed for subtraction", nil());
     }
-    Object *first = clone(car(arguments));
+    Object *first = car(arguments);
     if (! is_number(first)) {
-        return error("Number expected", first);
+        return error("Number expected", clone(first));
     }
     if (is_nil(cdr(arguments))) {
-        return first;
+        return clone(first);
     }
-    Object *second = clone(car(cdr(arguments)));
+    Object *second = cadr(arguments);
     if (! is_number(second)) {
-        destroy(first);
-        return error("Number expected", second);
+        return error("Number expected", clone(second));
     }
-    Object *result = number(*(long *)value(first) - *(long *)value(second));
-    destroy(first);
-    destroy(second);
-    return result;
+    return number(*(long *)value(first) - *(long *)value(second));
 }
 
 static Object *nil_p(Object *arguments, ErrorHandler error, Binding *binding) {
     if (is_nil(arguments)) {
         return error("Arguments needed for unary operator nil?", nil());
     }
-    Object *result = boolean(is_nil(car(arguments)));
-    return result;
+    return boolean(is_nil(car(arguments)));
 }
 
 static Object *set_value(Object *symbol, Object *rvalue, ErrorHandler error, Binding *binding) {

@@ -3,6 +3,7 @@
 #include "pair.h"
 #include "exception.h"
 #include "exit.h"
+#include "local.h"
 #include "interpreter.h"
 #include <stdio.h>
 
@@ -21,9 +22,10 @@ int main(int argc, char **argv) {
     enable_exceptions();
     create_interpreter();
     create_reader();
+    create_local();
     do {
         Try {
-            print(eval(read(), throw_exception, top_level()));
+            print(eval(local(read()), throw_exception, top_level()));
         } Catch {
             if (is_exit_code((Object *)exception_information())) {
                 will_exit(*(int *)value((Object *)exception_information()));
@@ -32,6 +34,7 @@ int main(int argc, char **argv) {
             }
         }
     } while (! exiting());
+    destroy_local();
     free_reader();
     free_interpreter();
     disable_exceptions();

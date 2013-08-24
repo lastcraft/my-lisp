@@ -10,6 +10,8 @@ Object *pair(Object *, Object *);
 int is_pair(Object *);
 Object *car(Object *);
 Object *cdr(Object *);
+Object *cadr(Object *);
+Object *caddr(Object *);
 Object *reverse(Object *);
 
 #endif

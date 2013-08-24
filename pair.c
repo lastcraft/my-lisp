@@ -64,6 +64,14 @@ Object *cdr(Object *object) {
     return pair->cdr;    
 }
 
+Object *cadr(Object *object) {
+    return car(cdr(object));
+}
+
+Object *caddr(Object *object) {
+    return car(cdr(cdr(object)));
+}
+
 Object *reverse(Object *object) {
     if (! is_pair(object)) {
         return object;
