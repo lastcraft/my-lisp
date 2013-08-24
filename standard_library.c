@@ -133,18 +133,14 @@ static Object *numerically_equal(Object *arguments, ErrorHandler error, Binding 
 
 static Object *plus(Object *arguments, ErrorHandler error, Binding *binding) {
     long total = 0L;
-    Object *tail;
-    while (! is_nil(arguments)) {
-        tail = clone(cdr(arguments));
-        if (! is_number(car(arguments))) {
-            Object *bad_number = clone(car(arguments));
-            destroy(tail);
-            return error("Not a number", (void *)bad_number);
-        }
-        total = total + *(long *)value(car(arguments));
-        arguments = tail;
+    if (is_nil(arguments)) {
+        return number(0L);
     }
-    return number(total);
+    if (! is_number(car(arguments))) {
+        return error("Not a number", (void *)car(arguments));
+    }
+    return number(*(long *)value(car(arguments))
+                  + *(long *)value(plus(cdr(arguments), error, binding)));
 }
 
 static Object *minus(Object *arguments, ErrorHandler error, Binding *binding) {
