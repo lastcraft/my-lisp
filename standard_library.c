@@ -45,54 +45,46 @@ void declare_standard_library(Binding *binding) {
 
 static Object *quit(Object *arguments, ErrorHandler error, Binding *binding) {
     Object *code = exit_code(is_pair(arguments) && is_number(car(arguments)) ? *(int *)value(car(arguments)) : 0);
-    destroy(arguments);
     return error("Quitting", code);
 }
 
 static Object *quote(Object *arguments, ErrorHandler error, Binding *binding) {
     Object *as_is = clone(car(arguments));
-    destroy(arguments);
     return as_is;
 }
 
 static Object *set(Object *arguments, ErrorHandler error, Binding *binding) {
     Object *symbol = clone(car(arguments));
     Object *rvalue = clone(car(cdr(arguments)));
-    destroy(arguments);
     return set_value(symbol, rvalue, error, binding);
 }
 
 static Object *set_pling(Object *arguments, ErrorHandler error, Binding *binding) {
     Object *symbol = clone(car(arguments));
     Object *rvalue = clone(car(cdr(arguments)));
-    destroy(arguments);
     return overwrite_value(symbol, rvalue, binding);
 }
 
 static Object *setq(Object *arguments, ErrorHandler error, Binding *binding) {
     Object *symbol = clone(car(arguments));
     Object *rvalue = eval(clone(car(cdr(arguments))), error, binding);
-    destroy(arguments);
     return set_value(symbol, rvalue, error, binding);
 }
 
 static Object *setq_pling(Object *arguments, ErrorHandler error, Binding *binding) {
     Object *symbol = clone(car(arguments));
     Object *rvalue = eval(clone(car(cdr(arguments))), error, binding);
-    destroy(arguments);
     return overwrite_value(symbol, rvalue, binding);
 }
 
 static Object *lambda_built_in(Object *arguments, ErrorHandler error, Binding *binding) {
     Object *parameters = clone(car(arguments));
     if (! is_argument_list(parameters)) {
-        destroy(arguments);
         return error("Not an argument list", parameters);
     }
     Object *block = clone(car(cdr(arguments)));
     if (! is_pair(block)) {
         destroy(parameters);
-        destroy(arguments);
         return error("Not a code block", block);
     }
     return lambda(parameters, block);
@@ -101,11 +93,9 @@ static Object *lambda_built_in(Object *arguments, ErrorHandler error, Binding *b
 static Object *defun(Object *arguments, ErrorHandler error, Binding *binding) {
     Object *symbol = clone(car(arguments));
     if (! is_identifier(symbol)) {
-        destroy(arguments);
         return error("Not an identifier", symbol);
     }
     Object *lambda_arguments = clone(cdr(arguments));
-    destroy(arguments);
     Object *new_lambda = lambda_built_in(lambda_arguments, error, binding);
     return overwrite_value(symbol, new_lambda, binding);
 }
@@ -116,20 +106,16 @@ static Object *branch(Object *arguments, ErrorHandler error, Binding *binding) {
         Object *argument_result = eval(clone(car(arguments)), error, binding);
         condition = is_true(argument_result);
     } Catch {
-        destroy(arguments);
         return rethrow();
     }
     Object *true_block = clone(car(cdr(arguments)));
     if (is_nil(true_block)) {
-        destroy(arguments);
         return error("No block to execute", true_block);
     } else if (condition) {
-        destroy(arguments);
         return eval(true_block, error, binding);
     }
     destroy(true_block);
     Object *false_block = clone(car(cdr(cdr(arguments))));
-    destroy(arguments);
     if (! is_nil(false_block)) {
         return eval(false_block, error, binding);
     }
@@ -138,18 +124,15 @@ static Object *branch(Object *arguments, ErrorHandler error, Binding *binding) {
 
 static Object *numerically_equal(Object *arguments, ErrorHandler error, Binding *binding) {
     if (is_nil(arguments)) {
-        destroy(arguments);
         return error("Nothing to compare", nil());
     }
     Object *initial = clone(car(arguments));
     if (! is_number(initial)) {
-        destroy(arguments);
         return error("Must be a number", initial);
     }
     long comparison = *(long *)value(initial);
     destroy(initial);
     Object *remainder = clone(cdr(arguments));
-    destroy(arguments);
     return boolean(compare_numbers(comparison, remainder, error));
 }
 
@@ -160,12 +143,10 @@ static Object *plus(Object *arguments, ErrorHandler error, Binding *binding) {
         tail = clone(cdr(arguments));
         if (! is_number(car(arguments))) {
             Object *bad_number = clone(car(arguments));
-            destroy(arguments);
             destroy(tail);
             return error("Not a number", (void *)bad_number);
         }
         total = total + *(long *)value(car(arguments));
-        destroy(arguments);
         arguments = tail;
     }
     return number(total);
@@ -173,20 +154,17 @@ static Object *plus(Object *arguments, ErrorHandler error, Binding *binding) {
 
 static Object *minus(Object *arguments, ErrorHandler error, Binding *binding) {
     if (is_nil(arguments)) {
-        return error("Starting value needed for subtraction", arguments);
+        return error("Starting value needed for subtraction", nil());
     }
     Object *first = clone(car(arguments));
     if (! is_number(first)) {
-        destroy(arguments);
         return error("Number expected", first);
     }
     if (is_nil(cdr(arguments))) {
-        destroy(arguments);
         return first;
     }
     Object *second = clone(car(cdr(arguments)));
     if (! is_number(second)) {
-        destroy(arguments);
         destroy(first);
         return error("Number expected", second);
     }
@@ -198,10 +176,9 @@ static Object *minus(Object *arguments, ErrorHandler error, Binding *binding) {
 
 static Object *nil_p(Object *arguments, ErrorHandler error, Binding *binding) {
     if (is_nil(arguments)) {
-        return error("Arguments needed for unary operator nil?", arguments);
+        return error("Arguments needed for unary operator nil?", nil());
     }
     Object *result = boolean(is_nil(car(arguments)));
-    destroy(arguments);
     return result;
 }
 

@@ -45,7 +45,7 @@ Object *eval(Object *object, ErrorHandler error, Binding *binding) {
     Object *result;
     create_local();
     Try {
-        result = eval_object(local(object), error, binding);
+        result = eval_object(local(clone(object)), error, binding);
     } Catch {
         destroy_local();
         rethrow();
@@ -135,7 +135,7 @@ static Object *apply_lambda(Object *function, Object *arguments, ErrorHandler er
 }
 
 static Object *execute(Callable code, Object *arguments, ErrorHandler error, Binding *binding) {
-    return (*code)(clone(arguments), error, binding);
+    return (*code)(arguments, error, binding);
 }
 
 static void bind_parameters(Object *parameters, Object *arguments, ErrorHandler error, Binding *binding) {
@@ -149,5 +149,5 @@ static void bind_parameters(Object *parameters, Object *arguments, ErrorHandler 
         error("Bad function parameter", clone(car(parameters)));
     }
     add(binding, (char *)value(car(parameters)), clone(car(arguments)));
-    return bind_parameters(cdr(parameters), cdr(arguments), error, binding);
+    bind_parameters(cdr(parameters), cdr(arguments), error, binding);
 }
