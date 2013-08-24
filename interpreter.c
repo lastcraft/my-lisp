@@ -56,7 +56,7 @@ Object *eval(Object *object, ErrorHandler error, Binding *binding) {
 
 Object *eval_object(Object *object, ErrorHandler error, Binding *binding) {
     if (is_pair(object)) {
-        Object *identifier = clone(car(object));
+        Object *identifier = local(clone(car(object)));
         Object *arguments = local(clone(cdr(object)));
         return eval_call(identifier, arguments, error, binding);
     } else if (is_identifier(object)) {
@@ -93,16 +93,15 @@ static Object *eval_arguments_onto(Object *target, Object *source, ErrorHandler 
 
 static Object *eval_call(Object *identifier, Object *arguments, ErrorHandler error, Binding *binding) {
     if (! is_identifier(identifier)) {
-        return error("Identifier expected", (void *)identifier);
+        return error("Identifier expected", (void *)clone(identifier));
     }
     Object *function;
     if (! (function = find(binding, (char *)value(identifier)))) {
-        return error("Unknown identifier", (void *)identifier);
+        return error("Unknown identifier", (void *)clone(identifier));
     }
     if (! is_function(function)) {
-        return error("Identifier does not refer to a function", (void *)identifier);
+        return error("Identifier does not refer to a function", (void *)clone(identifier));
     }
-    destroy(identifier);
     return apply(clone(function), clone(arguments), error, binding);
 }
 
