@@ -123,19 +123,19 @@ static Object *eval_lambda(Object *body, Object *parameters, Object *arguments, 
 
 static Object *apply_built_in(Object *function, Object *arguments, ErrorHandler error, Binding *binding) {
     if (! is_special_form(function)) {
-        arguments = eval_arguments(arguments, error, binding);
+        arguments = local(eval_arguments(arguments, error, binding));
     }
     Callable built_in_code = code((BuiltIn *)value(function));
     return execute(built_in_code, arguments, error, binding);
 }
 
 static Object *apply_lambda(Object *function, Object *arguments, ErrorHandler error, Binding *binding) {
-    arguments = eval_arguments(arguments, error, binding);
+    arguments = local(eval_arguments(arguments, error, binding));
     return eval_lambda(body(function), parameters(function), arguments, error, binding);
 }
 
 static Object *execute(Callable code, Object *arguments, ErrorHandler error, Binding *binding) {
-    return (*code)(arguments, error, binding);
+    return (*code)(clone(arguments), error, binding);
 }
 
 static void bind_parameters(Object *parameters, Object *arguments, ErrorHandler error, Binding *binding) {
@@ -143,16 +143,11 @@ static void bind_parameters(Object *parameters, Object *arguments, ErrorHandler 
         return;
     }
     if (is_nil(arguments)) {
-        destroy(arguments);
         error("Too few arguments for", clone(car(parameters)));
     }
     if (! is_identifier(car(parameters))) {
-        destroy(arguments);
         error("Bad function parameter", clone(car(parameters)));
     }
-    Object *argument = clone(car(arguments));
-    add(binding, (char *)value(car(parameters)), argument);
-    Object *remaining_arguments = clone(cdr(arguments));
-    destroy(arguments);
-    return bind_parameters(cdr(parameters), remaining_arguments, error, binding);
+    add(binding, (char *)value(car(parameters)), clone(car(arguments)));
+    return bind_parameters(cdr(parameters), cdr(arguments), error, binding);
 }
