@@ -1,5 +1,6 @@
 #include "standard_library.h"
 #include "interpreter.h"
+#include "local.h"
 #include "binding.h"
 #include "type.h"
 #include "function.h"
@@ -44,78 +45,74 @@ void declare_standard_library(Binding *binding) {
 }
 
 static Object *quit(Object *arguments, ErrorHandler error, Binding *binding) {
-    Object *code = exit_code(is_pair(arguments) && is_number(car(arguments)) ? *(int *)value(car(arguments)) : 0);
-    return error("Quitting", code);
+    int code = 0;
+    if (is_pair(arguments) && is_number(car(arguments))) {
+        code = *(int *)value(car(arguments));
+    }
+    return error("Quitting", exit_code(code));
 }
 
 static Object *quote(Object *arguments, ErrorHandler error, Binding *binding) {
-    Object *as_is = clone(car(arguments));
-    return as_is;
+    return clone(car(arguments));
 }
 
 static Object *set(Object *arguments, ErrorHandler error, Binding *binding) {
-    Object *symbol = clone(car(arguments));
-    Object *rvalue = clone(car(cdr(arguments)));
-    return set_value(symbol, rvalue, error, binding);
+    return set_value(car(arguments),
+                     car(cdr(arguments)),
+                     error,
+                     binding);
 }
 
 static Object *set_pling(Object *arguments, ErrorHandler error, Binding *binding) {
-    Object *symbol = clone(car(arguments));
-    Object *rvalue = clone(car(cdr(arguments)));
-    return overwrite_value(symbol, rvalue, binding);
+    return overwrite_value(car(arguments),
+                           car(cdr(arguments)),
+                           binding);
 }
 
 static Object *setq(Object *arguments, ErrorHandler error, Binding *binding) {
-    Object *symbol = clone(car(arguments));
-    Object *rvalue = eval(clone(car(cdr(arguments))), error, binding);
-    return set_value(symbol, rvalue, error, binding);
+    return set_value(car(arguments),
+                     local(eval(car(cdr(arguments)), error, binding)),
+                     error,
+                     binding);
 }
 
 static Object *setq_pling(Object *arguments, ErrorHandler error, Binding *binding) {
-    Object *symbol = clone(car(arguments));
-    Object *rvalue = eval(clone(car(cdr(arguments))), error, binding);
-    return overwrite_value(symbol, rvalue, binding);
+    return overwrite_value(car(arguments),
+                           local(eval(car(cdr(arguments)), error, binding)),
+                           binding);
 }
 
 static Object *lambda_built_in(Object *arguments, ErrorHandler error, Binding *binding) {
-    Object *parameters = clone(car(arguments));
+    Object *parameters = car(arguments);
     if (! is_argument_list(parameters)) {
-        return error("Not an argument list", parameters);
+        return error("Not an argument list", clone(parameters));
     }
-    Object *block = clone(car(cdr(arguments)));
+    Object *block = car(cdr(arguments));
     if (! is_pair(block)) {
-        destroy(parameters);
-        return error("Not a code block", block);
+        return error("Not a code block", clone(block));
     }
-    return lambda(parameters, block);
+    return lambda(clone(parameters), clone(block));
 }
 
 static Object *defun(Object *arguments, ErrorHandler error, Binding *binding) {
-    Object *symbol = clone(car(arguments));
+    Object *symbol = car(arguments);
     if (! is_identifier(symbol)) {
-        return error("Not an identifier", symbol);
+        return error("Not an identifier", clone(symbol));
     }
-    Object *lambda_arguments = clone(cdr(arguments));
-    Object *new_lambda = lambda_built_in(lambda_arguments, error, binding);
+    Object *new_lambda = lambda_built_in(cdr(arguments), error, binding);
     return overwrite_value(symbol, new_lambda, binding);
 }
 
 static Object *branch(Object *arguments, ErrorHandler error, Binding *binding) {
-    bool condition;
-    Try {
-        Object *argument_result = eval(clone(car(arguments)), error, binding);
-        condition = is_true(argument_result);
-    } Catch {
-        return rethrow();
-    }
-    Object *true_block = clone(car(cdr(arguments)));
+    bool condition = is_true(eval(clone(car(arguments)), error, binding));
+    Object *true_block = car(cdr(arguments));
     if (is_nil(true_block)) {
         return error("No block to execute", true_block);
-    } else if (condition) {
+    }
+    if (condition) {
         return eval(true_block, error, binding);
     }
-    destroy(true_block);
-    Object *false_block = clone(car(cdr(cdr(arguments))));
+    Object *false_block = car(cdr(cdr(arguments)));
     if (! is_nil(false_block)) {
         return eval(false_block, error, binding);
     }
@@ -126,14 +123,12 @@ static Object *numerically_equal(Object *arguments, ErrorHandler error, Binding 
     if (is_nil(arguments)) {
         return error("Nothing to compare", nil());
     }
-    Object *initial = clone(car(arguments));
+    Object *initial = car(arguments);
     if (! is_number(initial)) {
-        return error("Must be a number", initial);
+        return error("Must be a number", clone(initial));
     }
     long comparison = *(long *)value(initial);
-    destroy(initial);
-    Object *remainder = clone(cdr(arguments));
-    return boolean(compare_numbers(comparison, remainder, error));
+    return boolean(compare_numbers(comparison, cdr(arguments), error));
 }
 
 static Object *plus(Object *arguments, ErrorHandler error, Binding *binding) {
@@ -184,22 +179,18 @@ static Object *nil_p(Object *arguments, ErrorHandler error, Binding *binding) {
 
 static Object *set_value(Object *symbol, Object *rvalue, ErrorHandler error, Binding *binding) {
     if (! is_identifier(symbol)) {
-        destroy(rvalue);
-        return error("Not an identifier", symbol);
+        return error("Not an identifier", clone(symbol));
     }
     char *identifier = (char *)value(symbol);
     if (NULL != find(binding, identifier)) {
-        destroy(rvalue);
-        return error("Already declared", symbol);
+        return error("Already declared", clone(symbol));
     }
-    add(binding, identifier, rvalue);
-    destroy(symbol);
+    add(binding, identifier, clone(rvalue));
     return nil();
 }
 
 static Object *overwrite_value(Object *symbol, Object *rvalue, Binding *binding) {
-    overwrite(binding, (char *)value(symbol), rvalue);
-    destroy(symbol);
+    overwrite(binding, (char *)value(symbol), clone(rvalue));
     return nil();
 }
 
@@ -209,20 +200,14 @@ static int is_argument_list(Object *list) {
 
 static bool compare_numbers(long comparison, Object *arguments, ErrorHandler error) {
     if (is_nil(arguments)) {
-        destroy(arguments);
         return true;
     }
-    Object *first = clone(car(arguments));
+    Object *first = car(arguments);
     if (! is_number(first)) {
-        destroy(arguments);
-        return error("Must be a number", first);
+        return error("Must be a number", clone(first));
     }
     if (comparison != *(long *)value(first)) {
-        destroy(arguments);
-        destroy(first);
         return false;
     }
-    Object *remainder = clone(cdr(arguments));
-    destroy(arguments);
-    return compare_numbers(comparison, remainder, error);
+    return compare_numbers(comparison, cdr(arguments), error);
 }
