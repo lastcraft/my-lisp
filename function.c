@@ -78,7 +78,7 @@ int is_lambda(Object *object) {
 }
 
 static void built_in_writer(void *built_in, Printf printer) {
-    printer("<Built-in: %p>", ((BuiltIn *)value((Object *)built_in))->code);
+    printer("<Built-in: %p>", ((BuiltIn *)built_in)->code);
 }
 
 static void lambda_writer(void *lambda, Printf printer) {
