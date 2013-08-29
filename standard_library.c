@@ -22,6 +22,7 @@ static Object *numerically_equal(Object *, ErrorHandler, Binding *);
 static Object *plus(Object *, ErrorHandler, Binding *);
 static Object *minus(Object *, ErrorHandler, Binding *);
 static Object *nil_p(Object *, ErrorHandler, Binding *);
+static Object *type_to_string(Object *, ErrorHandler, Binding *);
 static Object *set_value(Object *, Object *, ErrorHandler, Binding *);
 static Object *overwrite_value(Object *, Object *, Binding *);
 static int is_argument_list(Object *);
@@ -42,6 +43,7 @@ void declare_standard_library(Binding *binding) {
     add(binding, "+", built_in(plus));
     add(binding, "-", built_in(minus));
     add(binding, "nil?", built_in(nil_p));
+    add(binding, "type->string", built_in(type_to_string));
 }
 
 static Object *quit(Object *arguments, ErrorHandler error, Binding *binding) {
@@ -158,9 +160,16 @@ static Object *minus(Object *arguments, ErrorHandler error, Binding *binding) {
 
 static Object *nil_p(Object *arguments, ErrorHandler error, Binding *binding) {
     if (is_nil(arguments)) {
-        return error("Arguments needed for unary operator nil?", nil());
+        return error("Argument needed for unary operator nil?", nil());
     }
     return boolean(is_nil(car(arguments)));
+}
+
+static Object *type_to_string(Object *arguments, ErrorHandler error, Binding *binding) {
+    if (is_nil(arguments)) {
+        return error("Argument needed for unary operator nil?", nil());
+    }
+    return unquoted_string(type_name(car(arguments)));
 }
 
 static Object *set_value(Object *symbol, Object *rvalue, ErrorHandler error, Binding *binding) {

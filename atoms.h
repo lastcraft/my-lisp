@@ -19,6 +19,7 @@ int is_number(Object *);
 Object *identifier(char *);
 int is_identifier(Object *);
 Object *quoted_string(char *);
+Object *unquoted_string(char *);
 int is_string(Object *);
 
 #endif

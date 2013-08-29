@@ -73,6 +73,10 @@ Object *quoted_string(char *quoted) {
     return wrap(string_type, string);
 }
 
+Object *unquoted_string(char *unquoted) {
+    return wrap(string_type, unquoted);
+}
+
 int is_string(Object *object) {
     return is_a(string_type, object);
 }
