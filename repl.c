@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
         Try {
             print(eval(local(read()), throw_exception, top_level()));
         } Catch {
-            if (is_exit_code((Object *)exception_information())) {
+            if (is_exit_code(local((Object *)exception_information()))) {
                 will_exit(*(int *)value((Object *)exception_information()));
             } else {
                 print_error(exception_message(), (Object *)exception_information());
