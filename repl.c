@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     create_local();
     do {
         Try {
-            print(eval(local(read()), throw_exception, top_level()));
+            print(local(eval(local(read()), throw_exception, top_level())));
         } Catch {
             if (is_exit_code(local((Object *)exception_information()))) {
                 will_exit(*(int *)value((Object *)exception_information()));
@@ -54,7 +54,6 @@ static void print(Object *value) {
     if (value != NULL) {
         write_object(value, (Printf)printf);
         printf("\n");
-        destroy(value);
     }
 }
 
@@ -62,5 +61,4 @@ static void print_error(char *message, Object *object) {
     printf("%s: ", message);
     write_object(object, (Printf)printf);
     printf("\n");
-    destroy(object);
 }
