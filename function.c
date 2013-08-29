@@ -17,8 +17,8 @@ static void lambda_writer(void *, Printf);
 static void destroy_lambda(void *);
 
 void declare_functions(void) {
-    built_in_type = declare(free, built_in_writer);
-    lambda_type = declare(destroy_lambda, lambda_writer);
+    built_in_type = declare("Built in function", free, built_in_writer);
+    lambda_type = declare("Lambda", destroy_lambda, lambda_writer);
 }
 
 Object *built_in(Callable code) {

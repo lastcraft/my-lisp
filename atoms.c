@@ -13,10 +13,10 @@ static void string_writer(void *, Printf);
 static long last(char *);
 
 void declare_atoms(void) {
-    boolean_type = declare(free, boolean_writer);
-    number_type = declare(free, number_writer);
-    identifier_type = declare(free, identifier_writer);
-    string_type = declare(free, string_writer);
+    boolean_type = declare("Boolean", free, boolean_writer);
+    number_type = declare("Number", free, number_writer);
+    identifier_type = declare("Identifier", free, identifier_writer);
+    string_type = declare("String", free, string_writer);
 }
 
 Object *boolean(bool true_or_false) {

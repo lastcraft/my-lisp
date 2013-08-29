@@ -7,7 +7,7 @@ static void nil_writer(void *, Printf);
 static void do_nothing(void *);
 
 void declare_nil(void) {
-    nil_type = declare(do_nothing, nil_writer);
+    nil_type = declare("Nil", do_nothing, nil_writer);
 }
 
 Object *nil(void) {

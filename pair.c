@@ -15,7 +15,7 @@ static void destroy_pair(void *);
 static Object *reverse_onto(Object *, Object *);
 
 void declare_pair(void) {
-    pair_type = declare(destroy_pair, pair_writer);
+    pair_type = declare("Cons", destroy_pair, pair_writer);
 }
 
 Object *pair(Object *car, Object *cdr) {

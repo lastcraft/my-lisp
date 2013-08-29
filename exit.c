@@ -5,7 +5,7 @@
 static void exit_code_writer(void *, Printf);
 
 void declare_exit_code(void) {
-    declare(free, exit_code_writer);
+    exit_code_type = declare("Exit code", free, exit_code_writer);
 }
 
 Object *exit_code(int code) {
