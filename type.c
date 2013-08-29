@@ -16,12 +16,14 @@ struct Object_ {
 };
 
 struct Type_ {
+    char *name;
     void (*destructor)(void *);
     void (*writer)(void *, Printf);
 };
 
-Type *declare(void (*destructor)(void *), void (*writer)(void *, Printf)) {
+Type *declare(char *name, void (*destructor)(void *), void (*writer)(void *, Printf)) {
     Type *type = (Type *)malloc(sizeof(Type));
+    type->name = name;
     type->destructor = destructor;
     type->writer = writer;
     add_to_declarations(type);
@@ -54,6 +56,10 @@ Object *clone(Object *object) {
 
 int is_a(Type *type, Object *object) {
     return type == object->type;
+}
+
+char *type_name(Object *object) {
+    return object->type->name;
 }
 
 void *value(Object *object) {
