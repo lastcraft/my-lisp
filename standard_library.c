@@ -181,7 +181,7 @@ static Object *overwrite_value(Object *symbol, Object *rvalue, Binding *binding)
 }
 
 static int is_argument_list(Object *list) {
-    return 1;
+    return is_nil(list) || is_pair(list);
 }
 
 static bool compare_numbers(long comparison, Object *arguments, ErrorHandler error) {
