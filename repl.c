@@ -6,6 +6,7 @@
 #include "local.h"
 #include "interpreter.h"
 #include <stdio.h>
+#include <stdarg.h>
 
 extern void create_reader(void);
 extern void free_reader(void);
@@ -57,8 +58,12 @@ static void print(Object *value) {
     }
 }
 
-static void print_error(char *message, Object *object) {
-    printf("%s: ", message);
+static void print_error(char *message, Object *object, ...) {
+    va_list optional;
+    va_start(optional, optional);
+    vprintf(message, optional);
+    va_end;
+    printf(" - ");
     write_object(object, (Printf)printf);
     printf("\n");
 }
