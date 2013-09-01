@@ -17,7 +17,7 @@ static int request_exit = 0;
 static void will_exit(int);
 static int exiting(void);
 static void print(Object *value);
-static void print_error(char *, Object *);
+static void print_error(char *, Object *, ...);
 
 int main(int argc, char **argv) {
     enable_exceptions();
@@ -60,9 +60,9 @@ static void print(Object *value) {
 
 static void print_error(char *message, Object *object, ...) {
     va_list optional;
-    va_start(optional, optional);
+    va_start(optional, object);
     vprintf(message, optional);
-    va_end;
+    va_end(optional);
     printf(" - ");
     write_object(object, (Printf)printf);
     printf("\n");

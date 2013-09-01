@@ -25,7 +25,7 @@ static Object *nil_p(Object *, ErrorHandler, Binding *);
 static Object *type_to_string(Object *, ErrorHandler, Binding *);
 static Object *set_value(Object *, Object *, ErrorHandler, Binding *);
 static Object *overwrite_value(Object *, Object *, Binding *);
-static Object *enough_for_unary(Object *);
+static Object *enough_for_unary(Object *, ErrorHandler);
 static int is_argument_list(Object *);
 static bool compare_numbers(long, Object *, ErrorHandler);
 
@@ -190,7 +190,7 @@ static Object *overwrite_value(Object *symbol, Object *rvalue, Binding *binding)
     return nil();
 }
 
-static Object *enough_for_unary(Object *arguments) {
+static Object *enough_for_unary(Object *arguments, ErrorHandler error) {
     if (is_nil(arguments)) {
         return error("Argument needed for unary operator", nil());
     }
