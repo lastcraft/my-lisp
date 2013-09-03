@@ -78,12 +78,12 @@ static Object *eval_arguments(Object *arguments, ErrorHandler error, Binding *bi
     return reverse(eval_arguments_onto(nil(), arguments, error, binding));
 }
 
-static Object *eval_arguments_onto(Object *target, Object *source, ErrorHandler error, Binding *binding) {
-    if (is_nil(source)) {
-        return target;
+static Object *eval_arguments_onto(Object *evaluations, Object *arguments, ErrorHandler error, Binding *binding) {
+    if (is_nil(arguments)) {
+        return evaluations;
     }
-    return eval_arguments_onto(pair(eval(car(source), error, binding), target),
-                               cdr(source),
+    return eval_arguments_onto(pair(eval(car(arguments), error, binding), evaluations),
+                               cdr(arguments),
                                error,
                                binding);
 }

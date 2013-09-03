@@ -1,5 +1,6 @@
 #include "exception.h"
 #include "stack.h"
+#include "vstring.h"
 #include <setjmp.h>
 #include <stdlib.h>
 
@@ -28,7 +29,7 @@ jmp_buf *push_execution_context(void) {
     return frame;
 }
 
-void *throw_exception(char *message, void *information) {
+void *throw_exception(void *information, char *message, ...) {
     last_exception_message = message;
     last_exception_information = information;
     longjmp(*pop_execution_context(), 1);
