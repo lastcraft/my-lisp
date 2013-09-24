@@ -60,7 +60,7 @@ Object *apply(Object *function, Object *arguments, ErrorHandler error, Binding *
     } else if (is_lambda(function)) {
         return apply_lambda(function, arguments, error, binding);
     } else {
-        return error("Not a known function type", clone(function));
+        return error(clone(function), "Not a known function type");
     }
 }
 
@@ -90,14 +90,14 @@ static Object *eval_arguments_onto(Object *evaluations, Object *arguments, Error
 
 static Object *eval_call(Object *identifier, Object *arguments, ErrorHandler error, Binding *binding) {
     if (! is_identifier(identifier)) {
-        return error("Identifier expected", (void *)clone(identifier));
+        return error(clone(identifier), "Identifier expected");
     }
     Object *function = find(binding, (char *)value(identifier));
     if (function == NULL) {
-        return error("Unknown identifier", (void *)clone(identifier));
+        return error(clone(identifier), "Unknown identifier");
     }
     if (! is_function(function)) {
-        return error("Identifier does not refer to a function", (void *)clone(identifier));
+        return error(clone(identifier), "Identifier does not refer to a function");
     }
     return apply(local(function), arguments, error, binding);
 }
@@ -143,10 +143,10 @@ static void bind_parameters(Object *parameters, Object *arguments, ErrorHandler 
         return;
     }
     if (is_nil(arguments)) {
-        error("Too few arguments for", clone(car(parameters)));
+        error(clone(car(parameters)), "Too few arguments for");
     }
     if (! is_identifier(car(parameters))) {
-        error("Bad function parameter", clone(car(parameters)));
+        error(clone(car(parameters)), "Bad function parameter");
     }
     add(binding, (char *)value(car(parameters)), clone(car(arguments)));
     bind_parameters(cdr(parameters), cdr(arguments), error, binding);

@@ -17,7 +17,7 @@ static int request_exit = 0;
 static void will_exit(int);
 static int exiting(void);
 static void print(Object *value);
-static void print_error(char *, Object *, ...);
+static void print_error(Object *, char *, ...);
 
 int main(int argc, char **argv) {
     enable_exceptions();
@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
             if (is_exit_code(local((Object *)exception_information()))) {
                 will_exit(*(int *)value((Object *)exception_information()));
             } else {
-                print_error(exception_message(), (Object *)exception_information());
+                print_error((Object *)exception_information(), exception_message());
             }
         }
     } while (! exiting());
@@ -58,9 +58,9 @@ static void print(Object *value) {
     }
 }
 
-static void print_error(char *message, Object *object, ...) {
+static void print_error(Object *object, char *message, ...) {
     va_list optional;
-    va_start(optional, object);
+    va_start(optional, message);
     vprintf(message, optional);
     va_end(optional);
     printf(" - ");
