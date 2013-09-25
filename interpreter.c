@@ -67,8 +67,6 @@ Object *apply(Object *function, Object *arguments, ErrorHandler error, Binding *
 static Object *eval_object(Object *object, ErrorHandler error, Binding *binding) {
     if (is_pair(object)) {
         return eval_function(car(object), cdr(object), error, binding);
-    } else if (is_lambda(car(object))) {
-        return apply_lambda(car(object), cdr(object), error, binding);
     } else if (is_identifier(object)) {
         return eval_identifier(object, error, binding);
     } else {
