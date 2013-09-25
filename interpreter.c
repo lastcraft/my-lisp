@@ -10,7 +10,7 @@
 
 static Binding *top_level_binding;
 static Object *eval_object(Object *, ErrorHandler, Binding *);
-static Object *eval_call(Object *, Object *, ErrorHandler, Binding *);
+static Object *eval_function(Object *, Object *, ErrorHandler, Binding *);
 static Object *eval_identifier(Object *, ErrorHandler, Binding *);
 static Object *eval_arguments(Object *, ErrorHandler, Binding *);
 static Object *eval_arguments_onto(Object *, Object *, ErrorHandler, Binding *);
@@ -66,7 +66,9 @@ Object *apply(Object *function, Object *arguments, ErrorHandler error, Binding *
 
 static Object *eval_object(Object *object, ErrorHandler error, Binding *binding) {
     if (is_pair(object)) {
-        return eval_call(car(object), cdr(object), error, binding);
+        return eval_function(car(object), cdr(object), error, binding);
+    } else if (is_lambda(car(object))) {
+        return apply_lambda(car(object), cdr(object), error, binding);
     } else if (is_identifier(object)) {
         return eval_identifier(object, error, binding);
     } else {
@@ -88,7 +90,7 @@ static Object *eval_arguments_onto(Object *evaluations, Object *arguments, Error
                                binding);
 }
 
-static Object *eval_call(Object *identifier, Object *arguments, ErrorHandler error, Binding *binding) {
+static Object *eval_function(Object *identifier, Object *arguments, ErrorHandler error, Binding *binding) {
     if (! is_identifier(identifier)) {
         return error(clone(identifier), "Identifier expected");
     }
