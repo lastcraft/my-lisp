@@ -92,10 +92,10 @@ static Object *eval_arguments_onto(Object *evaluations, Object *arguments, Error
 static Object *eval_call(Object *caller, Object *arguments, ErrorHandler error, Binding *binding) {
     caller = local(eval_object(caller, error, binding));
     if (is_identifier(caller)) {
-        return eval_function(caller, arguments, error, binding);
+        return error(clone(caller), "Identifier does not refer to a function");
     }
-    if (is_lambda(caller)) {
-        return apply_lambda(caller, arguments, error, binding);
+    if (is_function(caller)) {
+        return apply(caller, arguments, error, binding);
     }
     return error(clone(caller), "Identifier expected");
 }
@@ -106,7 +106,6 @@ static Object *eval_function(Object *identifier, Object *arguments, ErrorHandler
         return error(clone(identifier), "Unknown identifier");
     }
     if (! is_function(function)) {
-        return error(clone(identifier), "Identifier does not refer to a function");
     }
     return apply(local(function), arguments, error, binding);
 }
