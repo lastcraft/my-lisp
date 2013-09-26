@@ -90,10 +90,10 @@ static Object *eval_arguments_onto(Object *evaluations, Object *arguments, Error
 }
 
 static Object *eval_call(Object *caller, Object *arguments, ErrorHandler error, Binding *binding) {
+    caller = local(eval_object(caller, error, binding));
     if (is_identifier(caller)) {
         return eval_function(caller, arguments, error, binding);
     }
-    caller = local(eval_object(caller, error, binding));
     if (is_lambda(caller)) {
         return apply_lambda(caller, arguments, error, binding);
     }
