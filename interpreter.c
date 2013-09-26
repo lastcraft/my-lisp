@@ -11,7 +11,6 @@
 static Binding *top_level_binding;
 static Object *eval_object(Object *, ErrorHandler, Binding *);
 static Object *eval_call(Object *, Object *, ErrorHandler, Binding *);
-static Object *eval_function(Object *, Object *, ErrorHandler, Binding *);
 static Object *eval_identifier(Object *, ErrorHandler, Binding *);
 static Object *eval_arguments(Object *, ErrorHandler, Binding *);
 static Object *eval_arguments_onto(Object *, Object *, ErrorHandler, Binding *);
@@ -98,16 +97,6 @@ static Object *eval_call(Object *caller, Object *arguments, ErrorHandler error, 
         return apply(caller, arguments, error, binding);
     }
     return error(clone(caller), "Identifier expected");
-}
-
-static Object *eval_function(Object *identifier, Object *arguments, ErrorHandler error, Binding *binding) {
-    Object *function = find(binding, (char *)value(identifier));
-    if (function == NULL) {
-        return error(clone(identifier), "Unknown identifier");
-    }
-    if (! is_function(function)) {
-    }
-    return apply(local(function), arguments, error, binding);
 }
 
 static Object *eval_identifier(Object *identifier, ErrorHandler error, Binding *binding) {
