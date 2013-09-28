@@ -17,6 +17,7 @@ static Object *setq(Object *, ErrorHandler, Binding *);
 static Object *setq_pling(Object *, ErrorHandler, Binding *);
 static Object *lambda_built_in(Object *, ErrorHandler, Binding *);
 static Object *defun(Object *, ErrorHandler, Binding *);
+static Object *capture_binding(Object *, ErrorHandler, Binding *);
 static Object *branch(Object *, ErrorHandler, Binding *);
 static Object *numerically_equal(Object *, ErrorHandler, Binding *);
 static Object *plus(Object *, ErrorHandler, Binding *);
@@ -39,6 +40,7 @@ void declare_standard_library(Binding *binding) {
     add(binding, "setq!", special_form(built_in(setq_pling)));
     add(binding, "lambda", special_form(built_in(lambda_built_in)));
     add(binding, "defun", special_form(built_in(defun)));
+    add(binding, "binding", built_in(capture_binding));
     add(binding, "if", special_form(built_in(branch)));
     add(binding, "=", built_in(numerically_equal));
     add(binding, "+", built_in(plus));
@@ -99,6 +101,10 @@ static Object *defun(Object *arguments, ErrorHandler error, Binding *binding) {
     }
     Object *new_lambda = lambda_built_in(cdr(arguments), error, binding);
     return overwrite_value(symbol, new_lambda, binding);
+}
+
+static Object *capture_binding(Object *arguments, ErrorHandler error, Binding *binding) {
+    return surface_binding(binding);
 }
 
 static Object *branch(Object *arguments, ErrorHandler error, Binding *binding) {

@@ -26,6 +26,7 @@ void create_interpreter(void) {
     declare_atoms();
     declare_pair();
     declare_functions();
+    declare_binding();
     declare_exit_code();
     create_local();
     top_level_binding = create_binding(NULL);
@@ -46,8 +47,8 @@ void declare_binding(void) {
     binding_type = declare("Binding", (Free)free_binding, binding_writer);
 }
 
-Object *capture_binding(Binding *binding) {
-    return wrap(binding_type, binding);
+Object *surface_binding(Binding *binding) {
+    return clone(wrap(binding_type, create_binding(binding)));
 }
 
 Object *eval(Object *object, ErrorHandler error, Binding *binding) {
