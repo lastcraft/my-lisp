@@ -19,6 +19,7 @@ static Object *apply_built_in(Object *, Object *, ErrorHandler, Binding *);
 static Object *apply_lambda(Object *, Object *, ErrorHandler, Binding *);
 static Object *execute(Callable, Object *, ErrorHandler, Binding *);
 static void bind_parameters(Object *, Object *, ErrorHandler, Binding *);
+static void binding_writer(void *, Printf);
 
 void create_interpreter(void) {
     declare_nil();
@@ -39,6 +40,14 @@ void free_interpreter(void) {
 
 Binding *top_level(void) {
     return top_level_binding;
+}
+
+void declare_binding(void) {
+    binding_type = declare("Binding", (Free)free_binding, binding_writer);
+}
+
+Object *capture_binding(Binding *binding) {
+    return wrap(binding_type, binding);
 }
 
 Object *eval(Object *object, ErrorHandler error, Binding *binding) {
@@ -147,4 +156,8 @@ static void bind_parameters(Object *parameters, Object *arguments, ErrorHandler 
     }
     add(binding, (char *)value(car(parameters)), clone(car(arguments)));
     bind_parameters(cdr(parameters), cdr(arguments), error, binding);
+}
+
+static void binding_writer(void *binding, Printf printer) {
+    printer("<Binding>");
 }

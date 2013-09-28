@@ -5,9 +5,13 @@
 #include "exception.h"
 #include "binding.h"
 
+Type *binding_type;
+
 void create_interpreter(void);
 void free_interpreter(void);
 Binding *top_level(void);
+void declare_binding(void);
+Object *capture_binding(Binding *);
 Object *eval(Object *, ErrorHandler, Binding *);
 Object *apply(Object *, Object *, ErrorHandler, Binding *);
 

@@ -6,6 +6,7 @@
 typedef struct Object_ Object;
 typedef struct Type_ Type;
 typedef int (*Printf)(char *, ...);
+typedef void (*Free)(void *);
 
 Type *declare(char *name, void (*destructor)(void *), void (*writer)(void *, Printf));
 Object *wrap(Type *, void *);
