@@ -11,7 +11,8 @@ void create_interpreter(void);
 void free_interpreter(void);
 Binding *top_level(void);
 void declare_binding(void);
-Object *surface_binding(Binding *);
+Object *wrap_binding(Binding *);
+Binding *unwrap_binding(Object *);
 Object *eval(Object *, ErrorHandler, Binding *);
 Object *apply(Object *, Object *, ErrorHandler, Binding *);
 

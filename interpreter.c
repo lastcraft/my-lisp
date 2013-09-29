@@ -47,8 +47,12 @@ void declare_binding(void) {
     binding_type = declare("Binding", (Free)free_binding, binding_writer);
 }
 
-Object *surface_binding(Binding *binding) {
-    return clone(wrap(binding_type, create_binding(binding)));
+Object *wrap_binding(Binding *binding) {
+    return wrap(binding_type, create_binding(binding));
+}
+
+Binding *unwrap_binding(Object *object) {
+    return (Binding *)value(object);
 }
 
 Object *eval(Object *object, ErrorHandler error, Binding *binding) {
