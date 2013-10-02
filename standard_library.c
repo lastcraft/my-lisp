@@ -114,7 +114,7 @@ static Object *eval_in_binding(Object *arguments, ErrorHandler error, Binding *b
         return error(nil(), "No block to eval");
     }
     if (! is_nil(cdr(arguments))) {
-        binding = unwrap_binding(cadr(arguments));
+        binding = access_binding(cadr(arguments));
     }
     return local(eval(car(arguments), error, binding));
 }

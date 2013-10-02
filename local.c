@@ -47,6 +47,9 @@ static StackFrame *create_frame(void) {
 }
 
 static void destroy_frame(StackFrame *frame) {
+    for (long i = frame->used; i >= 0; i++) {
+        destroy(frame->vector[i]);
+    }
     free(frame->vector);
     free(frame);
 }

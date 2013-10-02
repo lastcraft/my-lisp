@@ -12,7 +12,7 @@ void free_interpreter(void);
 Binding *top_level(void);
 void declare_binding(void);
 Object *wrap_binding(Binding *);
-Binding *unwrap_binding(Object *);
+Binding *access_binding(Object *);
 Object *eval(Object *, ErrorHandler, Binding *);
 Object *apply(Object *, Object *, ErrorHandler, Binding *);
 

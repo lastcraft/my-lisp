@@ -51,7 +51,7 @@ Object *wrap_binding(Binding *binding) {
     return wrap(binding_type, create_binding(binding));
 }
 
-Binding *unwrap_binding(Object *object) {
+Binding *access_binding(Object *object) {
     return (Binding *)value(object);
 }
 
