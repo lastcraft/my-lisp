@@ -12,9 +12,11 @@ struct Entry_ {
 
 struct Binding_ {
     Binding *parent;
+    long reference_count;
     Entry *first;
 };
 
+static Binding *use_binding(Binding *);
 static Entry *create_entry(Entry *, char *, Object *);
 static Object *free_entry(Entry *);
 static Entry **vacancy(Binding *);
@@ -23,12 +25,17 @@ static int key_matches(char *, char *);
 
 Binding *create_binding(Binding *parent) {
     Binding *binding = (Binding *)malloc(sizeof(Binding));
-    binding->parent = parent;
+    binding->parent = use_binding(parent);
+    binding->reference_count = 0L;
     binding->first = NULL;
     return binding;
 }
 
 Binding *free_binding(Binding *binding) {
+    if (binding->reference_count > 1L) {
+        binding->reference_count--;
+        return binding->parent;
+    }
     Binding *parent = binding->parent;
     Entry *entry = binding->first;
     while (entry != NULL) {
@@ -36,8 +43,16 @@ Binding *free_binding(Binding *binding) {
         destroy(free_entry(entry));
         entry = next;
     }
+    free_binding(binding->parent);
     free(binding);
     return parent;
+}
+
+static Binding *use_binding(Binding *binding) {
+    if (binding != NULL) {
+        binding->reference_count++;
+    }
+    return binding;
 }
 
 void add(Binding *binding, char *key, Object *object) {
